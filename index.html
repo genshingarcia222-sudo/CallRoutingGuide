@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClinicalHealth HVA Console — Call Protocol Determinator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16232A;
+    --ink-soft:#4E5E66;
+    --paper:#F2F6F6;
+    --panel:#FFFFFF;
+    --line:#D9E2E2;
+    --line-soft:#E7EEEE;
+    --teal:#155C5C;
+    --teal-deep:#0B3D3D;
+    --teal-tint:#E6F0EF;
+    --brick:#B24A3B;
+    --brick-tint:#FBEAE7;
+    --amber:#A9772C;
+    --amber-tint:#FBF1E1;
+    --moss:#3E7A57;
+    --moss-tint:#E8F3EC;
+    --radius:3px;
+    --sans:'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+    --mono:'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:var(--sans);
+    background:var(--paper);
+    color:var(--ink);
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--teal);}
+
+  /* ===== Header ===== */
+  header.top{
+    background:var(--teal-deep);
+    color:#EAF2F1;
+    padding:18px 28px;
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+    border-bottom:3px solid var(--teal);
+  }
+  header.top .brand{
+    display:flex;
+    align-items:baseline;
+    gap:12px;
+  }
+  header.top .brand h1{
+    font-size:18px;
+    font-weight:600;
+    margin:0;
+    letter-spacing:.2px;
+  }
+  header.top .brand span.tag{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:#AFC9C6;
+    border-left:1px solid #2A6262;
+    padding-left:12px;
+  }
+  header.top .callmeta{
+    font-family:var(--mono);
+    font-size:12px;
+    color:#BFDAD7;
+  }
+
+  /* ===== Layout ===== */
+  .shell{
+    display:grid;
+    grid-template-columns:220px minmax(0,760px);
+    gap:0;
+    max-width:1080px;
+    margin:0 auto;
+    align-items:start;
+  }
+  nav.jumpnav{
+    position:sticky;
+    top:0;
+    padding:28px 14px 28px 28px;
+    align-self:start;
+  }
+  nav.jumpnav ol{
+    list-style:none;
+    margin:0;
+    padding:0;
+    border-left:2px solid var(--line);
+  }
+  nav.jumpnav li{margin:0;}
+  nav.jumpnav a{
+    display:block;
+    padding:8px 0 8px 14px;
+    margin-left:-2px;
+    border-left:2px solid transparent;
+    text-decoration:none;
+    color:var(--ink-soft);
+    font-size:13px;
+  }
+  nav.jumpnav a:hover{color:var(--teal); border-left-color:var(--line);}
+  nav.jumpnav a.active{color:var(--teal-deep); border-left-color:var(--teal); font-weight:600;}
+  nav.jumpnav .navflag{
+    margin-top:18px;
+    padding:10px 12px;
+    font-family:var(--mono);
+    font-size:11.5px;
+    border-radius:var(--radius);
+    display:none;
+  }
+  nav.jumpnav .navflag.show{display:block;}
+  nav.jumpnav .navflag.urgent{background:var(--brick-tint); color:var(--brick); border:1px solid #EBC7C0;}
+
+  main{padding:28px 28px 80px 20px;}
+
+  section.card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:22px 24px;
+    margin-bottom:16px;
+    scroll-margin-top:14px;
+  }
+  section.card h2{
+    font-size:14px;
+    text-transform:none;
+    letter-spacing:.2px;
+    margin:0 0 4px 0;
+    color:var(--teal-deep);
+    font-weight:600;
+  }
+  section.card p.hint{
+    margin:0 0 16px 0;
+    color:var(--ink-soft);
+    font-size:12.5px;
+  }
+
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px 18px;}
+  .field{margin-bottom:14px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{
+    display:block;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--ink);
+    margin-bottom:5px;
+  }
+  .field .sub{font-weight:400; color:var(--ink-soft); font-size:11.5px;}
+  input[type=text], input[type=date], input[type=number], select, textarea{
+    width:100%;
+    padding:9px 10px;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    background:#FCFDFD;
+    font-family:var(--sans);
+    font-size:14px;
+    color:var(--ink);
+  }
+  textarea{resize:vertical; min-height:56px;}
+  input:focus, select:focus, textarea:focus{
+    outline:2px solid var(--teal);
+    outline-offset:1px;
+    border-color:var(--teal);
+  }
+
+  .segmented{display:flex; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; width:fit-content;}
+  .segmented button{
+    font-family:var(--sans);
+    font-size:13px;
+    font-weight:600;
+    padding:8px 16px;
+    background:#FCFDFD;
+    border:none;
+    border-right:1px solid var(--line);
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .segmented button:last-child{border-right:none;}
+  .segmented button.active{background:var(--teal); color:#fff;}
+  .segmented button.active.no{background:var(--ink-soft);}
+  .segmented.small button{padding:6px 12px; font-size:12.5px;}
+
+  .checkrow{display:flex; gap:18px; flex-wrap:wrap;}
+  .checkrow label{
+    display:flex; align-items:center; gap:7px;
+    font-size:13.5px; font-weight:500; color:var(--ink);
+    cursor:pointer;
+  }
+  .checkrow input[type=checkbox]{width:16px; height:16px; accent-color:var(--teal);}
+
+  .painwrap{display:flex; align-items:center; gap:14px;}
+  input[type=range]{flex:1; accent-color:var(--teal);}
+  .painvalue{
+    font-family:var(--mono);
+    font-size:20px;
+    font-weight:600;
+    color:var(--teal-deep);
+    width:34px;
+    text-align:center;
+  }
+
+  .conditional{
+    margin-top:12px;
+    padding:12px 14px;
+    background:var(--teal-tint);
+    border:1px dashed #B9D6D3;
+    border-radius:var(--radius);
+    display:none;
+  }
+  .conditional.show{display:block;}
+  .conditional label{font-size:12.5px; font-weight:600; margin-bottom:6px;}
+
+  .callout{
+    margin-top:6px;
+    font-size:12px;
+    color:var(--ink-soft);
+    font-family:var(--mono);
+  }
+
+  /* ===== Buttons ===== */
+  .actions{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    margin:22px 0 8px 0;
+  }
+  button.primary{
+    background:var(--teal-deep);
+    color:#fff;
+    border:none;
+    padding:13px 26px;
+    font-family:var(--sans);
+    font-size:14.5px;
+    font-weight:600;
+    border-radius:var(--radius);
+    cursor:pointer;
+    letter-spacing:.2px;
+  }
+  button.primary:hover{background:var(--teal);}
+  button.ghost{
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--ink-soft);
+    padding:12px 18px;
+    font-family:var(--sans);
+    font-size:13.5px;
+    font-weight:600;
+    border-radius:var(--radius);
+    cursor:pointer;
+  }
+  button.ghost:hover{border-color:var(--teal); color:var(--teal-deep);}
+  .actions .required-note{font-size:11.5px; color:var(--ink-soft); font-family:var(--mono);}
+
+  /* ===== Results ===== */
+  #results{display:none;}
+  #results.show{display:block; animation:reveal .38s ease-out;}
+  @keyframes reveal{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);}}
+
+  .resultcard{
+    border:1px solid var(--teal);
+    border-radius:var(--radius);
+    background:var(--panel);
+    overflow:hidden;
+    margin-bottom:16px;
+  }
+  .resultcard .resulthead{
+    background:var(--teal-deep);
+    color:#fff;
+    padding:20px 24px;
+  }
+  .resulthead .eyebrow{
+    font-family:var(--mono);
+    font-size:11px;
+    color:#9FCAC6;
+    margin-bottom:6px;
+  }
+  .resulthead h3{
+    margin:0 0 10px 0;
+    font-size:22px;
+    font-weight:700;
+  }
+  .resulthead .meta{
+    display:flex; gap:10px; flex-wrap:wrap;
+  }
+  .pill{
+    font-family:var(--mono);
+    font-size:11px;
+    padding:4px 9px;
+    border-radius:999px;
+    background:rgba(255,255,255,.12);
+    color:#EAF2F1;
+  }
+  .pill.conf-high{background:var(--moss); color:#fff;}
+  .pill.conf-medium{background:var(--amber); color:#fff;}
+  .pill.conf-low{background:var(--brick); color:#fff;}
+
+  .resultbody{padding:22px 24px;}
+  .resultbody .whentouse{
+    font-size:13.5px;
+    color:var(--ink-soft);
+    border-left:3px solid var(--line);
+    padding-left:14px;
+    margin-bottom:20px;
+  }
+
+  .subhead{
+    font-size:12px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.6px;
+    color:var(--teal-deep);
+    margin:0 0 10px 0;
+  }
+
+  ul.rationale, ul.notes, ol.script{
+    margin:0 0 20px 0;
+    padding-left:20px;
+  }
+  ul.rationale li, ul.notes li{margin-bottom:7px; font-size:13.5px;}
+  ul.notes{list-style:none; padding-left:0;}
+  ul.notes li{
+    background:var(--amber-tint);
+    border:1px solid #EFDCB6;
+    color:#7A5920;
+    padding:10px 12px;
+    border-radius:var(--radius);
+    font-size:13px;
+  }
+  ul.notes li.danger{background:var(--brick-tint); border-color:#EBC7C0; color:var(--brick);}
+  ol.script{padding-left:22px;}
+  ol.script li{
+    font-size:13.8px;
+    margin-bottom:10px;
+    padding-left:4px;
+  }
+  ol.script li::marker{font-family:var(--mono); color:var(--teal); font-weight:600;}
+
+  .resultfoot{
+    display:flex; gap:10px; padding:0 24px 22px 24px;
+  }
+
+  details.refbox{
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    background:var(--panel);
+    padding:14px 18px;
+    margin-bottom:16px;
+  }
+  details.refbox summary{
+    cursor:pointer;
+    font-weight:600;
+    font-size:13px;
+    color:var(--teal-deep);
+  }
+  details.refbox .refgrid{margin-top:14px;}
+  details.refbox .refgrid p{font-size:13px; margin:0 0 10px 0;}
+  details.refbox .refgrid b{color:var(--ink);}
+
+  footer.foot{
+    max-width:1080px;
+    margin:0 auto;
+    padding:10px 28px 50px 28px;
+    color:var(--ink-soft);
+    font-size:11.5px;
+    font-family:var(--mono);
+  }
+
+  @media (max-width:860px){
+    .shell{grid-template-columns:1fr;}
+    nav.jumpnav{
+      position:static;
+      display:flex;
+      overflow-x:auto;
+      padding:14px 16px;
+      border-bottom:1px solid var(--line);
+      background:var(--panel);
+    }
+    nav.jumpnav ol{display:flex; border-left:none; gap:4px;}
+    nav.jumpnav a{border-left:none; padding:8px 12px; white-space:nowrap; border-bottom:2px solid transparent;}
+    nav.jumpnav a.active{border-bottom-color:var(--teal); border-left:none;}
+    nav.jumpnav .navflag{display:none !important;}
+    .grid2{grid-template-columns:1fr;}
+    main{padding:18px 16px 60px 16px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <h1>ClinicalHealth HVA Console</h1>
+    <span class="tag">LIVE CALL CHECKLIST → PROTOCOL DETERMINATOR</span>
+  </div>
+  <div class="callmeta" id="callClock"></div>
+</header>
+
+<div class="shell">
+  <nav class="jumpnav">
+    <ol>
+      <li><a href="#sec-id" class="jl">Caller &amp; Patient</a></li>
+      <li><a href="#sec-purpose" class="jl">Purpose &amp; Complaint</a></li>
+      <li><a href="#sec-incident" class="jl">Incident Details</a></li>
+      <li><a href="#sec-symptom" class="jl">Symptom Check</a></li>
+      <li><a href="#sec-history" class="jl">Medical History</a></li>
+      <li><a href="#sec-insurance" class="jl">Insurance</a></li>
+      <li><a href="#sec-employer" class="jl">Employer Info</a></li>
+      <li><a href="#sec-meds" class="jl">Medications</a></li>
+    </ol>
+    <div class="navflag urgent" id="urgentFlag">⚠ Intolerable or ≥7 pain — Same-Day override active</div>
+  </nav>
+
+  <main>
+
+    <section class="card" id="sec-id">
+      <h2>1 · Caller &amp; Patient</h2>
+      <p class="hint">P2 — confirm identity before anything else. Established / New splits the call per the New-Patient vs. Established-Patient path.</p>
+      <div class="grid2">
+        <div class="field">
+          <label for="patientName">Name of Patient</label>
+          <input type="text" id="patientName" placeholder="Full legal name">
+        </div>
+        <div class="field">
+          <label for="callerName">Name of Caller</label>
+          <input type="text" id="callerName" placeholder="Full legal name">
+        </div>
+        <div class="field">
+          <label for="patientDOB">Date of Birth — Patient</label>
+          <input type="date" id="patientDOB">
+        </div>
+        <div class="field">
+          <label for="callerDOB">Date of Birth — Caller</label>
+          <input type="date" id="callerDOB">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Established?</label>
+        <div class="segmented" data-group="established">
+          <button type="button" data-val="Y">Y</button>
+          <button type="button" data-val="N">N</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>New?</label>
+        <div class="segmented" data-group="newPatient">
+          <button type="button" data-val="Y">Y</button>
+          <button type="button" data-val="N">N</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="status">Status <span class="sub">(chart / NP form flag — leave N/A if none applies)</span></label>
+        <select id="status">
+          <option value="NA">N/A — no flag on chart</option>
+          <option value="P">P — Processing (NP form pending)</option>
+          <option value="A">A — Approved</option>
+          <option value="D">D — Denied</option>
+          <option value="T">T — Termed</option>
+          <option value="CE">CE — Clearance Expired</option>
+          <option value="3y">3y — Not seen in 3+ years</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="card" id="sec-purpose">
+      <h2>2 · Purpose &amp; Complaint</h2>
+      <p class="hint">P1 — the primary driver of protocol selection.</p>
+      <div class="field">
+        <label for="purpose">Reason of Call</label>
+        <select id="purpose">
+          <option value="">— Select —</option>
+          <option value="establish">Establish Care / NP Form Status</option>
+          <option value="schedule">Schedule Appointment</option>
+          <option value="cancel">Cancel Appointment</option>
+          <option value="reschedule">Reschedule Appointment</option>
+          <option value="confirm">Confirm Appointment</option>
+          <option value="termination_followup">Termination Notice Follow-up</option>
+          <option value="mva">Motor Vehicle Accident (MVA)</option>
+          <option value="tb">TB Testing</option>
+          <option value="workcomp">Workers' Compensation</option>
+          <option value="preop">Preoperative Clearance</option>
+          <option value="referral">Referral Request</option>
+          <option value="referral_status">Referral / Order Status Check</option>
+          <option value="third_party_referral">Third-Party Referral Coordination</option>
+          <option value="lab_order">Lab / Radiology Order Request</option>
+          <option value="mrr">Medical Records Request</option>
+          <option value="deceased">Deceased Patient Notification</option>
+          <option value="nonauth">Information Request — Non-Authorized Party</option>
+          <option value="insurance_verif">Outbound Insurance Verification</option>
+          <option value="recommendations">Results / Recommendation Follow-up</option>
+          <option value="workform">Work Note / Form Request</option>
+          <option value="medication">Medication Request</option>
+          <option value="vaccination">Vaccination Request</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="cc">CC <span class="sub">(chief complaint — what the patient describes in their own words)</span></label>
+        <textarea id="cc" placeholder="e.g. lower back pain since Tuesday, wants annual physical, needs refill of..."></textarea>
+      </div>
+      <div class="field">
+        <label>Also requesting a Work Note / Form? <span class="sub">(separate from the Reason of Call above — can apply alongside any determined protocol, with exclusions noted in the result)</span></label>
+        <div class="segmented" data-group="forOtherForm">
+          <button type="button" data-val="Y">Y</button>
+          <button type="button" data-val="N">N</button>
+        </div>
+      </div>
+      <div class="conditional" id="formTypeFollowup">
+        <label for="formType">What form?</label>
+        <select id="formType">
+          <option value="">— Select —</option>
+          <option value="FMLA">FMLA</option>
+          <option value="Disability Forms">Disability Forms</option>
+          <option value="Medical Clearance Forms">Medical Clearance Forms</option>
+          <option value="Work Notes">Work Notes</option>
+          <option value="School Physical Forms">School Physical Forms</option>
+        </select>
+        <div class="callout">Not combinable with MVA, Workers' Comp, or Hospital/ER Follow-up. Combinable with Same-Day only if the form relates to that visit's chief complaint.</div>
+      </div>
+    </section>
+
+    <section class="card" id="sec-incident">
+      <h2>3 · Incident / Visit Details</h2>
+      <p class="hint">Mainly relevant for MVA, Workers' Comp, and Same-Day calls — skip anything that doesn't apply.</p>
+      <div class="grid2">
+        <div class="field">
+          <label for="what">What <span class="sub">(what happened / what's needed)</span></label>
+          <input type="text" id="what" placeholder="e.g. rear-ended at a red light">
+        </div>
+        <div class="field">
+          <label for="how">How <span class="sub">(mechanism)</span></label>
+          <input type="text" id="how" placeholder="e.g. slipped on wet floor">
+        </div>
+        <div class="field">
+          <label for="when">When <span class="sub">(date it happened)</span></label>
+          <input type="date" id="when">
+          <div class="conditional" id="whenFollowup">
+            <label>Was the patient working at the time?</label>
+            <div class="segmented small" data-group="workingAtTime">
+              <button type="button" data-val="Y">Y</button>
+              <button type="button" data-val="N">N</button>
+            </div>
+            <div class="callout">Weekday (Mon–Fri) detected. Answering Y here routes the call to Workers' Compensation, unless pain scale/tolerability already triggers a Same-Day override.</div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="where">Where <span class="sub">(location)</span></label>
+          <input type="text" id="where" placeholder="e.g. intersection of 4th &amp; Main">
+          <div class="conditional" id="whereFollowup">
+            <label>Was the patient driving as part of job duties?</label>
+            <div class="segmented small" data-group="drivingForWork">
+              <button type="button" data-val="Y">Y</button>
+              <button type="button" data-val="N">N</button>
+            </div>
+            <div class="callout">Weekday + working — this determines MVA vs. Workers' Comp classification.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="sec-symptom">
+      <h2>4 · Symptom Check <span class="sub">(IP1)</span></h2>
+      <p class="hint">Intolerable pain, or a pain scale of 7 or greater, overrides every other protocol to Same-Day Appointment.</p>
+      <div class="field">
+        <label for="painScale">Pain Scale (1–10)</label>
+        <div class="painwrap">
+          <input type="range" id="painScale" min="1" max="10" value="1">
+          <div class="painvalue" id="painValue">1</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>Tolerability</label>
+        <div class="segmented" data-group="tolerability">
+          <button type="button" data-val="T">T — Tolerable</button>
+          <button type="button" data-val="I">I — Intolerable</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="sec-history">
+      <h2>5 · Medical History Flags</h2>
+      <div class="field">
+        <label>Recently admitted?</label>
+        <div class="segmented" data-group="recentlyAdmitted">
+          <button type="button" data-val="Y">Y</button>
+          <button type="button" data-val="N">N</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>At ER or Hospital?</label>
+        <div class="segmented" data-group="atER">
+          <button type="button" data-val="Y">Y</button>
+          <button type="button" data-val="N">N</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>With Pre-operation clinicals?</label>
+        <div class="segmented" data-group="preopClinicals">
+          <button type="button" data-val="Y">Y — received</button>
+          <button type="button" data-val="N">N — not yet</button>
+        </div>
+        <div class="conditional" id="preopFollowup">
+          <div class="grid2">
+            <div class="field">
+              <label for="preopFacilityName">Facility Name</label>
+              <input type="text" id="preopFacilityName">
+            </div>
+            <div class="field">
+              <label for="preopSurgeonName">Surgeon's Name</label>
+              <input type="text" id="preopSurgeonName">
+            </div>
+            <div class="field">
+              <label for="preopOperationDate">Proposed date of operation</label>
+              <input type="date" id="preopOperationDate">
+            </div>
+            <div class="field">
+              <label for="preopProcedureName">Procedure / name of operation</label>
+              <input type="text" id="preopProcedureName">
+            </div>
+          </div>
+          <div class="callout">Pre-op visits must land exactly on the 14th day before the operation date — the result panel will flag it if there isn't enough lead time.</div>
+        </div>
+      </div>
+
+      <p class="subhead" style="margin-top:22px;">Referral &amp; Documentation Checks</p>
+      <div class="grid2">
+        <div class="field">
+          <label>Seen by Doctor ______?</label>
+          <div class="segmented small" data-group="seenByDrHello">
+            <button type="button" data-val="Y">Y</button>
+            <button type="button" data-val="N">N</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>For Referral?</label>
+          <div class="segmented small" data-group="forReferral">
+            <button type="button" data-val="Y">Y</button>
+            <button type="button" data-val="N">N</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>For 3rd-Party Referral?</label>
+          <div class="segmented small" data-group="forThirdPartyReferral">
+            <button type="button" data-val="Y">Y</button>
+            <button type="button" data-val="N">N</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>With Referral Message from Doctor ______?</label>
+          <div class="segmented small" data-group="withReferralMessage">
+            <button type="button" data-val="Y">Y</button>
+            <button type="button" data-val="N">N</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>With Clinicals / Lab Records / Rad Records?</label>
+          <div class="segmented small" data-group="withClinicalsLabRad">
+            <button type="button" data-val="Y">Y</button>
+            <button type="button" data-val="N">N</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>First-time Referral?</label>
+          <div class="segmented small" data-group="firstTimeReferral">
+            <button type="button" data-val="Y">Y</button>
+            <button type="button" data-val="N">N</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Same Referral Facility?</label>
+          <div class="segmented small" data-group="sameReferralFacility">
+            <button type="button" data-val="Y">Y</button>
+            <button type="button" data-val="N">N</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="referralFacilityName">Facility Name</label>
+          <input type="text" id="referralFacilityName">
+        </div>
+        <div class="field">
+          <label>Same Facility? <span class="sub">(vs. prior referral)</span></label>
+          <div class="segmented small" data-group="sameFacility">
+            <button type="button" data-val="Y">Y</button>
+            <button type="button" data-val="N">N</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Same Diagnosis?</label>
+          <div class="segmented small" data-group="sameDiagnosis">
+            <button type="button" data-val="Y">Y</button>
+            <button type="button" data-val="N">N</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Prior-Authorization Expired?</label>
+          <div class="segmented small" data-group="priorAuthExpired">
+            <button type="button" data-val="Y">Y</button>
+            <button type="button" data-val="N">N</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Encounter Notes within the last 12 months?</label>
+          <div class="segmented small" data-group="encounterNotesWithin12mo">
+            <button type="button" data-val="Y">Y</button>
+            <button type="button" data-val="N">N</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="sec-insurance">
+      <h2>6 · Insurance <span class="sub">(IP3)</span></h2>
+      <p class="hint">Check all that apply — feeds Medicare Wellness eligibility and MVA/Workers' Comp coverage disclosures.</p>
+      <div class="checkrow">
+        <label><input type="checkbox" value="Medicare" class="insChk"> Medicare</label>
+        <label><input type="checkbox" value="AHCCCS" class="insChk"> AHCCCS</label>
+        <label><input type="checkbox" value="Commercial" class="insChk"> Commercial Insurance</label>
+      </div>
+    </section>
+
+    <section class="card" id="sec-employer">
+      <h2>7 · Employer Info <span class="sub">(Workers' Compensation only)</span></h2>
+      <div class="grid2">
+        <div class="field">
+          <label for="companyName">Company Name</label>
+          <input type="text" id="companyName">
+        </div>
+        <div class="field">
+          <label for="companyManager">Company Manager</label>
+          <input type="text" id="companyManager">
+        </div>
+        <div class="field" style="grid-column:1/-1;">
+          <label for="companyAddress">Company Address</label>
+          <input type="text" id="companyAddress">
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="sec-meds">
+      <h2>8 · Medications</h2>
+      <div class="field">
+        <label>Taken Medication/s?</label>
+        <div class="segmented" data-group="medsTaken">
+          <button type="button" data-val="Y">Y</button>
+          <button type="button" data-val="N">N</button>
+        </div>
+        <div class="conditional" id="medsFollowup">
+          <label for="medsName">Name of medication(s)</label>
+          <input type="text" id="medsName" placeholder="e.g. Lisinopril 10mg, Metformin 500mg">
+        </div>
+      </div>
+    </section>
+
+    <div class="actions">
+      <button class="primary" id="determineBtn">Determine Protocol</button>
+      <button class="ghost" id="resetBtn">Reset Checklist</button>
+      <span class="required-note">Missing fields are filled with the highest-confidence default — nothing blocks a result.</span>
+    </div>
+
+    <div id="results">
+      <div class="resultcard">
+        <div class="resulthead">
+          <div class="eyebrow" id="resCluster">CLUSTER</div>
+          <h3 id="resProtocol">Protocol Name</h3>
+          <div class="meta">
+            <span class="pill" id="resConfidence">Confidence</span>
+            <span class="pill" id="resRecap">Recap</span>
+            <span class="pill" id="resMulti">Multi-layer probing</span>
+          </div>
+        </div>
+        <div class="resultbody">
+          <p class="whentouse" id="resWhen"></p>
+
+          <p class="subhead">Why this protocol</p>
+          <ul class="rationale" id="resRationale"></ul>
+
+          <div id="resNotesWrap">
+            <p class="subhead">Notes &amp; advisories</p>
+            <ul class="notes" id="resNotes"></ul>
+          </div>
+
+          <p class="subhead">Resolution — what to do</p>
+          <ol class="script" id="resScript"></ol>
+        </div>
+        <div class="resultfoot">
+          <button class="ghost" id="copyBtn">Copy resolution to clipboard</button>
+          <button class="ghost" id="printBtn">Print call summary</button>
+        </div>
+      </div>
+
+      <details class="refbox">
+        <summary>Global spiel reference — Intro / Outro / Hold / Recap</summary>
+        <div class="refgrid">
+          <p><b>Inbound Intro —</b> Hello! Thank you for calling ClinicalHealth. This is [AGENT NAME]. How may I assist you today?</p>
+          <p><b>Outbound Intro —</b> Hello! I'm calling on behalf of ClinicalHealth. My name is [AGENT NAME]. Am I speaking with [PATIENT NAME]?</p>
+          <p><b>Hold – Placing —</b> Would it be alright if I place this call on a brief hold while I pull up your chart / check the provider's schedule / verify this information? Thank you!</p>
+          <p><b>Hold – Returning —</b> Thank you so much for your patience while I had you on hold.</p>
+          <p><b>Anything Else (pre-recap) —</b> Is there anything else I can help you with today before I give you a quick recap of this call?</p>
+          <p><b>Universal Recap —</b> Before we end the call, allow me to give you a quick recap: [restate the action taken]. Does everything sound correct?</p>
+          <p><b>Inbound Outro —</b> You're welcome. If you need anything else, don't hesitate to call us back. Thank you for calling ClinicalHealth. Have a great day!</p>
+          <p><b>Outbound Outro —</b> Thank you again for your time. This is [AGENT NAME] from ClinicalHealth. Have a great day!</p>
+        </div>
+      </details>
+    </div>
+
+  </main>
+</div>
+
+<footer class="foot">ClinicalHealth HVA Console · built from the ClinicalHealth Protocol Checklist Tool spiel library · runs entirely in this browser, nothing is sent anywhere.</footer>
+
+<script>
+(function(){
+
+  /* ---------- small state store ---------- */
+  const state = {
+    established:null, newPatient:null, status:'NA', purpose:'', cc:'',
+    workingAtTime:null, drivingForWork:null,
+    tolerability:null, painScale:1,
+    recentlyAdmitted:null, atER:null, preopClinicals:null,
+    companyName:'', companyAddress:'', companyManager:'',
+    medsTaken:null, medsName:'',
+    seenByDrHello:null, forReferral:null, forThirdPartyReferral:null,
+    withReferralMessage:null, withClinicalsLabRad:null, firstTimeReferral:null,
+    sameReferralFacility:null, sameFacility:null, sameDiagnosis:null,
+    priorAuthExpired:null, encounterNotesWithin12mo:null,
+    forOtherForm:null
+  };
+
+  /* ---------- segmented controls ---------- */
+  document.querySelectorAll('.segmented').forEach(function(seg){
+    const group = seg.getAttribute('data-group');
+    seg.querySelectorAll('button').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        const val = btn.getAttribute('data-val');
+        const already = state[group] === val;
+        seg.querySelectorAll('button').forEach(b=>b.classList.remove('active','no'));
+        if(already){
+          state[group] = null;
+        } else {
+          state[group] = val;
+          btn.classList.add('active');
+          if(val==='N') btn.classList.add('no');
+          // keep sync between Established / New
+          if(group==='established'){
+            const other = document.querySelector('.segmented[data-group="newPatient"]');
+            state.newPatient = val==='Y' ? 'N' : 'Y';
+            syncSegVisual(other, state.newPatient);
+          }
+          if(group==='newPatient'){
+            const other = document.querySelector('.segmented[data-group="established"]');
+            state.established = val==='Y' ? 'N' : 'Y';
+            syncSegVisual(other, state.established);
+          }
+        }
+        onIncidentDateOrWork();
+      });
+    });
+  });
+  function syncSegVisual(segEl, val){
+    segEl.querySelectorAll('button').forEach(function(b){
+      b.classList.remove('active','no');
+      if(b.getAttribute('data-val')===val){
+        b.classList.add('active');
+        if(val==='N') b.classList.add('no');
+      }
+    });
+  }
+
+  /* ---------- pain slider ---------- */
+  const painInput = document.getElementById('painScale');
+  const painValue = document.getElementById('painValue');
+  painInput.addEventListener('input', function(){
+    painValue.textContent = painInput.value;
+    state.painScale = parseInt(painInput.value,10);
+  });
+
+  /* ---------- status select ---------- */
+  document.getElementById('status').addEventListener('change', function(e){
+    state.status = e.target.value;
+  });
+
+  /* ---------- purpose / cc ---------- */
+  document.getElementById('purpose').addEventListener('change', function(e){
+    state.purpose = e.target.value;
+    refreshFormTypeVisibility();
+  });
+  document.getElementById('cc').addEventListener('input', function(e){ state.cc = e.target.value; });
+
+  /* ---------- incident when/where conditional reveals ---------- */
+  const whenInput = document.getElementById('when');
+  const whenFollowup = document.getElementById('whenFollowup');
+  const whereFollowup = document.getElementById('whereFollowup');
+
+  function isWeekday(dateStr){
+    if(!dateStr) return false;
+    const d = new Date(dateStr + 'T00:00:00');
+    const day = d.getDay(); // 0 Sun ... 6 Sat
+    return day>=1 && day<=5;
+  }
+  function onIncidentDateOrWork(){
+    const weekday = isWeekday(whenInput.value);
+    whenFollowup.classList.toggle('show', weekday);
+    const showWhere = weekday && state.workingAtTime==='Y';
+    whereFollowup.classList.toggle('show', showWhere);
+  }
+  whenInput.addEventListener('change', onIncidentDateOrWork);
+
+  /* ---------- medications conditional ---------- */
+  const medsFollowup = document.getElementById('medsFollowup');
+  document.querySelector('.segmented[data-group="medsTaken"]').addEventListener('click', function(){
+    setTimeout(function(){ medsFollowup.classList.toggle('show', state.medsTaken==='Y'); }, 0);
+  });
+
+  /* ---------- pre-op clinicals conditional ---------- */
+  const preopFollowup = document.getElementById('preopFollowup');
+  document.querySelector('.segmented[data-group="preopClinicals"]').addEventListener('click', function(){
+    setTimeout(function(){ preopFollowup.classList.toggle('show', state.preopClinicals==='Y'); }, 0);
+  });
+
+  /* ---------- work note / form conditional ---------- */
+  const formTypeFollowup = document.getElementById('formTypeFollowup');
+  function refreshFormTypeVisibility(){
+    formTypeFollowup.classList.toggle('show', state.purpose === 'workform' || state.forOtherForm === 'Y');
+  }
+  document.querySelector('.segmented[data-group="forOtherForm"]').addEventListener('click', function(){
+    setTimeout(refreshFormTypeVisibility, 0);
+  });
+
+  /* ---------- urgent nav flag ---------- */
+  const urgentFlag = document.getElementById('urgentFlag');
+  function refreshUrgentFlag(){
+    const urgent = state.tolerability==='I' || (state.painScale>=7);
+    urgentFlag.classList.toggle('show', urgent);
+  }
+  document.querySelector('.segmented[data-group="tolerability"]').addEventListener('click', refreshUrgentFlag);
+  painInput.addEventListener('input', refreshUrgentFlag);
+
+  /* ---------- insurance ---------- */
+  const insChks = document.querySelectorAll('.insChk');
+  function getInsurance(){
+    return Array.from(insChks).filter(c=>c.checked).map(c=>c.value);
+  }
+
+  /* ---------- text field bindings ---------- */
+  ['patientName','callerName','patientDOB','callerDOB','what','how','where',
+   'companyName','companyAddress','companyManager','medsName'].forEach(function(id){
+    const el = document.getElementById(id);
+    if(el) el.addEventListener('input', function(){ /* read directly on submit */ });
+  });
+
+  /* ---------- scrollspy ---------- */
+  const jumpLinks = document.querySelectorAll('.jl');
+  const cards = document.querySelectorAll('section.card');
+  window.addEventListener('scroll', function(){
+    let currentId = cards[0].id;
+    cards.forEach(function(c){
+      if(window.scrollY + 120 >= c.offsetTop) currentId = c.id;
+    });
+    jumpLinks.forEach(function(a){
+      a.classList.toggle('active', a.getAttribute('href') === '#'+currentId);
+    });
+  });
+
+  /* ---------- clock ---------- */
+  const clockEl = document.getElementById('callClock');
+  function tick(){
+    const now = new Date();
+    clockEl.textContent = now.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'2-digit'}) + '  ' +
+      now.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
+  }
+  tick(); setInterval(tick, 30000);
+
+  /* =====================================================================
+     PROTOCOL LIBRARY  (paraphrased line-items from the ClinicalHealth Spiel
+     Library; [BRACKETS] are filled live on the call where noted)
+     ===================================================================== */
+  const PROTOCOLS = {
+    "New Patient Establishing Care": {
+      cluster:"Appointment Setting", recap:true, multi:false,
+      when:"A caller who has never been seen at ClinicalHealth wants to establish care and has not yet started the New Patient (NP) process.",
+      resolution:[
+        "Direct the caller to complete a New Patient form — online at www.clinicalhealth.com or in person at the clinic.",
+        "Explain the 48-hour turnaround; if approved, clearance is valid for 3 months.",
+        "Collect a callback number so the clinic can reach them once status is ready."
+      ]
+    },
+    "New Patient Form Submitted, No Update": {
+      cluster:"Appointment Setting", recap:true, multi:false,
+      when:"A caller who has already submitted the NP form is calling to check status, and the office manager has not yet finalized it.",
+      resolution:[
+        "Inform the caller their NP form is still being finalized — the same 48-hour turnaround applies.",
+        "No appointment can be booked yet. Confirm the clinic will call once a decision is made."
+      ]
+    },
+    "New Patient Application Denied": {
+      cluster:"Appointment Setting", recap:true, multi:false,
+      when:"An established or prospective patient's New Patient application was reviewed and denied, so care cannot be established at ClinicalHealth at this time.",
+      resolution:[
+        "Inform the caller the NP application was denied [share the specific reason on file, if available].",
+        "Advise them to contact their insurance provider directly for a list of in-network clinics, since ClinicalHealth can't establish care at this time."
+      ]
+    },
+    "Clearance Expired": {
+      cluster:"Appointment Setting", recap:true, multi:false,
+      when:"A prospective or returning patient's prior NP clearance has lapsed past its 3-month validity, and a new NP form is required before scheduling.",
+      resolution:[
+        "Inform the caller their prior clearance expired (valid only 3 months) and a new NP form is required — online or in person.",
+        "Same 48-hour turnaround applies. Confirm the best callback number."
+      ]
+    },
+    "Established Patient Not Seen for Over 3 Years": {
+      cluster:"Appointment Setting", recap:true, multi:false,
+      when:"An established patient's last encounter on file is more than 3 years old, requiring re-establishment of care before scheduling.",
+      resolution:[
+        "Inform the caller they must re-establish care with a new NP form, since it's been 3+ years since their last visit.",
+        "Same 48-hour turnaround applies. Confirm the best callback number."
+      ]
+    },
+    "Regular Appointment": {
+      cluster:"Appointment Setting", recap:true, multi:true,
+      when:"An established patient wants to schedule a standard, non-urgent appointment for a general concern that doesn't fall under Same-Day, Annual Physical, Medicare Wellness, MVA, Workers' Comp, or another specialty protocol. Default outcome when nothing more specific applies.",
+      resolution:[
+        "Book the next available standard appointment at [PATIENT NAME]'s preferred day/time.",
+        "Have them arrive 15 minutes early with ID or insurance card, if available.",
+        "If pain later becomes intolerable or scores 7+, switch to Same-Day Appointment instead."
+      ]
+    },
+    "Same-Day Appointment": {
+      cluster:"Appointment Setting", recap:true, multi:true,
+      when:"An established patient is requesting to be seen the same day due to a new or worsening symptom — or has been transitioned here after probing revealed intolerable pain or an urgent need.",
+      resolution:[
+        "Book the earliest same-day opening available.",
+        "Have them arrive 15 minutes early with ID or insurance card, if available.",
+        "Advise going to the nearest Emergency Room immediately if pain becomes intolerable or worsens before the appointment."
+      ]
+    },
+    "Appointment Cancellation": {
+      cluster:"Appointment Setting", recap:true, multi:true,
+      when:"An established patient wants to cancel a scheduled appointment.",
+      resolution:[
+        "Cancel the located appointment and document the stated reason.",
+        "If symptom-related, offer to check whether Doctor ______ has a recommendation while on the line.",
+        "If this is a repeat cancellation (3 within 3 months), warn that scheduling privileges may be placed on hold pending clinic-manager review, and offer to reschedule instead."
+      ]
+    },
+    "Rescheduling": {
+      cluster:"Appointment Setting", recap:true, multi:true,
+      when:"An established patient wants to move an existing appointment and may have an additional request to fold into the same visit.",
+      resolution:[
+        "Move the appointment to the patient's new preferred day/time.",
+        "If they mention another concern or a form, offer to combine it into the same visit or handle it separately.",
+        "Confirm arrival 15 minutes early with ID or insurance card, if available."
+      ]
+    },
+    "Annual Physical": {
+      cluster:"Appointment Setting", recap:true, multi:false,
+      when:"An established patient is requesting to schedule a routine annual physical exam.",
+      resolution:[
+        "Book a 30-minute annual physical at the patient's preferred day/time — no fasting or fluid restriction needed.",
+        "Confirm arrival 15 minutes early with ID or insurance card, if available.",
+        "Note the next APE will be due 366 days from this visit."
+      ]
+    },
+    "Medicare Wellness": {
+      cluster:"Appointment Setting", recap:true, multi:true,
+      when:"An established Medicare patient is calling to schedule a routine exam, and the HVA must determine whether an Annual Physical or a Medicare Wellness Visit is the appropriate/eligible service.",
+      resolution:[
+        "Confirm Medicare is on file and it's been over a year since the last Wellness Visit, then book a 30-minute Medicare Wellness Visit.",
+        "If only commercial insurance is on file (no Medicare), switch to a standard Annual Physical instead — Wellness Visits are Medicare-specific.",
+        "Confirm arrival 15 minutes early with ID or insurance card, if available."
+      ]
+    },
+    "Hospital/ER Follow-up Appointment": {
+      cluster:"Appointment Setting", recap:true, multi:true,
+      when:"An established patient needs a follow-up visit after a hospital or ER stay — or has been transitioned here from MVA, Workers' Comp, or Lab/Radiology once an existing ER/hospital visit is confirmed.",
+      resolution:[
+        "Request medical records from the hospital/ER — 48-business-hour turnaround.",
+        "Once records are in, book the earliest available follow-up slot (same-day typically isn't offered for this visit type).",
+        "If records aren't received in time, follow up with the facility and call the patient once they arrive."
+      ]
+    },
+    "Patient Termination Notification": {
+      cluster:"Appointment Setting", recap:true, multi:false,
+      when:"An established patient's chart is flagged as terminated (\"termed\") from the practice, typically due to non-compliance, and the patient is attempting to schedule.",
+      resolution:[
+        "Inform the caller their chart is flagged as terminated [state the reason — misconduct or 3 cancellations in 3 months — if on file].",
+        "Recommend establishing care with another Primary Care Provider.",
+        "Advise contacting their insurance provider for a list of in-network clinics."
+      ]
+    },
+    "Appointment Confirmation": {
+      cluster:"Appointment Setting", recap:true, multi:false,
+      when:"An outbound or inbound call confirming a patient's already-scheduled appointment.",
+      resolution:[
+        "Confirm the patient's identity, then confirm the existing appointment date/time.",
+        "Remind them to arrive 15 minutes early with ID or insurance card, if available."
+      ]
+    },
+    "MVA Appointment": {
+      cluster:"Medical Services", recap:true, multi:true,
+      when:"An established patient requests an appointment related to a motor vehicle accident.",
+      resolution:[
+        "Confirm MVA eligibility: inside a licensed car or motorcycle, not an e-bike. If ineligible, book as a Regular Appointment instead.",
+        "Disclose that MVA visits are out-of-pocket unless Medicare or AHCCCS is on file.",
+        "Book the visit and advise going to the nearest ER if pain worsens before then."
+      ]
+    },
+    "TB Testing": {
+      cluster:"Medical Services", recap:true, multi:true,
+      when:"An established patient requests a TB skin test/shot, or is calling to schedule the required 48-hour reading.",
+      resolution:[
+        "Schedule the TB shot within the valid day range — never same-day, due to the mandatory 48-hour reading window.",
+        "If scheduling only the reading, confirm proof the shot was administered at ClinicalHealth.",
+        "If the 48-hour reading window has passed, a new TB shot appointment is required to restart the process."
+      ]
+    },
+    "Workmen's Compensation": {
+      cluster:"Medical Services", recap:true, multi:true,
+      when:"An established patient requests an appointment for a work-related injury.",
+      resolution:[
+        "Collect the employer's manager name and office address — required for billing the employer.",
+        "Book the visit and advise going to the nearest ER if pain worsens before then.",
+        "Note that the employer's coverage may not extend to conditions unrelated to job duties."
+      ]
+    },
+    "Preoperative Clearance": {
+      cluster:"Medical Services", recap:true, multi:true,
+      when:"An established patient's surgeon's office requires a pre-op clearance from ClinicalHealth ahead of a procedure.",
+      resolution:[
+        "Confirm the facility, surgeon, procedure, and operation date.",
+        "If documentation hasn't been received, direct the surgeon's office to fax it to 520-439-4466 before scheduling.",
+        "Book the pre-op visit exactly 14 days before the operation date (see notes below for the exact date and lead-time check)."
+      ]
+    },
+    "Referral": {
+      cluster:"Documentation", recap:true, multi:true,
+      when:"A patient requests a referral to an outside specialist for a new concern.",
+      resolution:[
+        "Book an evaluation appointment with Doctor ______ — a specialist referral can't be submitted without this visit first.",
+        "If a referral note from Doctor ______ is already on file for this concern, process it directly instead of scheduling a new evaluation."
+      ]
+    },
+    "Recurrent Referral": {
+      cluster:"Documentation", recap:true, multi:true,
+      when:"An established patient needs to return to a specialist they've already seen for the same concern, typically because prior authorization has lapsed.",
+      resolution:[
+        "If all eligibility criteria are met and prior authorization has expired, submit the recurrent referral and contact the patient once complete.",
+        "If prior authorization is still valid, no action is needed — the caller can contact the facility directly to schedule.",
+        "If any criterion fails, this doesn't qualify as recurrent — book a new Referral appointment with Doctor ______ instead (see notes below for which criterion failed)."
+      ]
+    },
+    "Referral and Order Status": {
+      cluster:"Documentation", recap:true, multi:false,
+      when:"A patient is calling to check the status of a previously submitted referral or order.",
+      resolution:[
+        "Inform the caller of the referral/order status: approved, pending, or declined.",
+        "If approved with clinicals on file, they may schedule directly with the specialist.",
+        "If declined, advise contacting their insurance provider for the denial reason and next options."
+      ]
+    },
+    "Referral for a Third Party": {
+      cluster:"Documentation", recap:true, multi:true,
+      when:"A representative from another provider's office is calling to coordinate a referral for a mutual patient.",
+      resolution:[
+        "Verify documentation status for the mutual patient before processing.",
+        "Process the referral and confirm the requesting office's contact info for follow-up.",
+        "Document the requesting party's name, facility, and call ID regardless of outcome."
+      ]
+    },
+    "New Radiology/Laboratory Order": {
+      cluster:"Documentation", recap:true, multi:true,
+      when:"An established patient requests a new lab or imaging order that was not previously discussed with the provider.",
+      resolution:[
+        "An appointment with Doctor ______ is required before the order can be processed — book that visit.",
+        "If the reason relates to an MVA or a hospital/ER visit, reroute to that protocol instead, since an appointment still needs to be scheduled there."
+      ]
+    },
+    "Medical Records Request (MRR) Call": {
+      cluster:"Documentation", recap:true, multi:true,
+      when:"A patient or an authorized party requests a copy of medical records or images.",
+      resolution:[
+        "Confirm the requestor category: the patient, a mutual facility, an insurance company, or a hospital.",
+        "Patient requests: 24-hour turnaround; choose pickup, fax, mail, or encrypted USB/CD (no email).",
+        "Facility/insurer/hospital requests: verify the organization first, then send via fax or encrypted transfer.",
+        "Any other requestor: require a Medical Records Request form signed by the patient."
+      ]
+    },
+    "Deceased Patient Protocol": {
+      cluster:"Documentation", recap:false, multi:false,
+      when:"An authorized party calls to notify the clinic that a patient has passed away.",
+      resolution:[
+        "Offer condolences and confirm the patient's name and date of birth.",
+        "Gather the approximate date of death and, if known, the cause, for the chart.",
+        "No scheduling or recap needed — close the call with condolences."
+      ]
+    },
+    "HIPAA Compliance": {
+      cluster:"Documentation", recap:false, multi:true,
+      when:"A caller requests protected health information but is not listed as an authorized person on the patient's account, or is calling from an outside facility.",
+      resolution:[
+        "Verify the caller's identity and relationship to the patient before disclosing anything.",
+        "If verified, continue with their underlying request (referral status, records, confirmation, etc.).",
+        "If not verified, decline to share information and invite them to call back once verification is possible."
+      ]
+    },
+    "Insurance Verification": {
+      cluster:"Documentation", recap:false, multi:true,
+      when:"An outbound call to a patient's insurance provider ahead of an upcoming visit, to confirm eligibility, benefits, and authorization requirements.",
+      resolution:[
+        "Call the insurance provider to confirm eligibility, benefits, copays, deductibles, and prior-authorization requirements ahead of the visit.",
+        "Document the representative's name and a confirmation number before closing the call."
+      ]
+    },
+    "Recommendations": {
+      cluster:"Documentation", recap:true, multi:true,
+      when:"An established patient calls for the provider's recommendation on results already in the chart, or for symptom advice, without wanting to be seen.",
+      resolution:[
+        "If results are in the chart but not yet reviewed, tell the caller the clinic will call back once Doctor ______ has reviewed them.",
+        "If they're requesting treatment advice without being seen, an appointment with Doctor ______ is required first — offer to schedule it."
+      ]
+    },
+    "Work Notes/FORMS": {
+      cluster:"Documentation", recap:true, multi:true,
+      when:"An established patient needs a school, work, or other form completed or signed by the provider.",
+      resolution:[
+        "Book an appointment so Doctor ______ can assess the patient and complete the form in person.",
+        "Forms can typically be combined with most other visit types — see notes below for exclusions (MVA, Workers' Comp, ER Follow-up, and same-day visits with an unrelated complaint)."
+      ]
+    },
+    "New Medication": {
+      cluster:"Medications", recap:true, multi:true,
+      when:"An established patient requests a medication that isn't currently listed on their chart, or a change in dosage for a current medication.",
+      resolution:[
+        "An appointment with Doctor ______ is required before a new medication or dosage change can be authorized — offer to schedule it."
+      ]
+    },
+    "Controlled Substances": {
+      cluster:"Medications", recap:true, multi:false,
+      when:"An established patient requests a refill of a controlled substance.",
+      resolution:[
+        "An in-person appointment with Doctor ______ is required to authorize a controlled-substance refill, including a PMP update — offer to schedule it."
+      ]
+    },
+    "Vaccination": {
+      cluster:"Medications", recap:true, multi:true,
+      when:"A patient requests a vaccine or booster that ClinicalHealth does not stock in-house, whether routine or due to a recent exposure.",
+      resolution:[
+        "If this is post-exposure, offer an appointment with Doctor ______ for assessment.",
+        "If routine/elective or declined, inform the caller ClinicalHealth doesn't stock vaccines on-site and recommend their preferred pharmacy."
+      ]
+    }
+  };
+
+  const PURPOSE_LABELS = {
+    establish:"Establish Care / NP Form Status", schedule:"Schedule Appointment", cancel:"Cancel Appointment",
+    reschedule:"Reschedule Appointment", confirm:"Confirm Appointment", termination_followup:"Termination Notice Follow-up",
+    mva:"Motor Vehicle Accident (MVA)", tb:"TB Testing", workcomp:"Workers' Compensation", preop:"Preoperative Clearance",
+    referral:"Referral Request", referral_status:"Referral / Order Status Check", third_party_referral:"Third-Party Referral Coordination",
+    lab_order:"Lab / Radiology Order Request", mrr:"Medical Records Request", deceased:"Deceased Patient Notification",
+    nonauth:"Information Request — Non-Authorized Party", insurance_verif:"Outbound Insurance Verification",
+    recommendations:"Results / Recommendation Follow-up", workform:"Work Note / Form Request",
+    medication:"Medication Request", vaccination:"Vaccination Request", "":"(not specified)"
+  };
+
+  /* =====================================================================
+     DECISION ENGINE
+     ===================================================================== */
+  function ageFromDOB(dobStr){
+    if(!dobStr) return null;
+    const dob = new Date(dobStr + 'T00:00:00');
+    if(isNaN(dob.getTime())) return null;
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if(m < 0 || (m===0 && today.getDate() < dob.getDate())) age--;
+    return age;
+  }
+
+  function readForm(){
+    return {
+      patientName: document.getElementById('patientName').value.trim(),
+      callerName: document.getElementById('callerName').value.trim(),
+      patientDOB: document.getElementById('patientDOB').value,
+      callerDOB: document.getElementById('callerDOB').value,
+      established: state.established,
+      newPatient: state.newPatient,
+      status: state.status,
+      purpose: state.purpose,
+      cc: document.getElementById('cc').value.trim(),
+      forOtherForm: state.forOtherForm,
+      formType: document.getElementById('formType').value,
+      what: document.getElementById('what').value.trim(),
+      how: document.getElementById('how').value.trim(),
+      where: document.getElementById('where').value.trim(),
+      when: document.getElementById('when').value,
+      workingAtTime: state.workingAtTime,
+      drivingForWork: state.drivingForWork,
+      painScale: state.painScale,
+      tolerability: state.tolerability,
+      recentlyAdmitted: state.recentlyAdmitted,
+      atER: state.atER,
+      preopClinicals: state.preopClinicals,
+      insurance: getInsurance(),
+      companyName: document.getElementById('companyName').value.trim(),
+      companyAddress: document.getElementById('companyAddress').value.trim(),
+      companyManager: document.getElementById('companyManager').value.trim(),
+      medsTaken: state.medsTaken,
+      medsName: document.getElementById('medsName').value.trim(),
+      preopFacilityName: document.getElementById('preopFacilityName').value.trim(),
+      preopSurgeonName: document.getElementById('preopSurgeonName').value.trim(),
+      preopOperationDate: document.getElementById('preopOperationDate').value,
+      preopProcedureName: document.getElementById('preopProcedureName').value.trim(),
+      seenByDrHello: state.seenByDrHello,
+      forReferral: state.forReferral,
+      forThirdPartyReferral: state.forThirdPartyReferral,
+      withReferralMessage: state.withReferralMessage,
+      withClinicalsLabRad: state.withClinicalsLabRad,
+      firstTimeReferral: state.firstTimeReferral,
+      sameReferralFacility: state.sameReferralFacility,
+      referralFacilityName: document.getElementById('referralFacilityName').value.trim(),
+      sameFacility: state.sameFacility,
+      sameDiagnosis: state.sameDiagnosis,
+      priorAuthExpired: state.priorAuthExpired,
+      encounterNotesWithin12mo: state.encounterNotesWithin12mo
+    };
+  }
+
+  function decide(d){
+    const rationale = [];
+    const notes = [];
+    let protocol = null;
+    let durationOverride = null;
+
+    const age = ageFromDOB(d.patientDOB);
+    const painNum = d.painScale;
+    const urgent = d.tolerability === 'I' || (painNum !== null && painNum >= 7);
+    const hasBeenER = d.recentlyAdmitted === 'Y' || d.atER === 'Y';
+    const isNew = d.established === 'N' || d.newPatient === 'Y';
+    const insurances = d.insurance || [];
+    const hasMedicare = insurances.includes('Medicare');
+    const hasAHCCCS = insurances.includes('AHCCCS');
+    const hasCommercial = insurances.includes('Commercial');
+    const insuranceLabel = insurances.length ? insurances.join(' + ') : '[INSURANCE ON FILE]';
+
+    function purposeLabel(p){ return PURPOSE_LABELS[p] || '(not specified)'; }
+
+    /* ---- Tier 1: hard chart-status flags always take priority ---- */
+    if(d.status === 'T'){
+      protocol = "Patient Termination Notification";
+      rationale.push('Chart status = T (Termed) — an administrative block that overrides the stated purpose of call.');
+      if(urgent) notes.push({text:'Caller also reports intolerable/worsening pain — advise the nearest Emergency Room regardless of the termination status.', danger:true});
+    } else if(d.status === 'D'){
+      protocol = "New Patient Application Denied";
+      rationale.push('Chart status = D (Denied) — the New Patient application was not approved.');
+      notes.push({text:"Advise the caller to contact their insurance provider directly for a list of in-network clinics, since ClinicalHealth cannot establish care at this time."});
+    } else if(d.status === 'CE'){
+      protocol = "Clearance Expired";
+      rationale.push('Chart status = CE (Clearance Expired) — prior NP clearance lapsed past its 3-month validity.');
+    } else if(d.status === '3y'){
+      protocol = "Established Patient Not Seen for Over 3 Years";
+      rationale.push('Chart status = 3y — no visit on file within the last 3 years; care must be re-established.');
+    } else if(d.status === 'P'){
+      protocol = "New Patient Form Submitted, No Update";
+      rationale.push('Chart status = P (Processing) — the New Patient form is still pending review.');
+    } else if(d.status === 'A' && (d.purpose === 'establish' || d.purpose === 'schedule' || !d.purpose)){
+      rationale.push('Chart status = A (Approved) — no administrative block.');
+      if(urgent){
+        protocol = "Same-Day Appointment";
+        let why;
+        if(d.tolerability === 'I' && painNum >= 7) why = 'Pain marked intolerable and scored ' + painNum + '/10 (at or above the threshold of 7)';
+        else if(d.tolerability === 'I') why = 'Pain marked intolerable' + (painNum ? ' (scale ' + painNum + '/10)' : '');
+        else why = 'Pain scale scored ' + painNum + '/10 — at or above the ≥7 override threshold, regardless of tolerability';
+        rationale.push(why + ' — takes priority over the standard approved-visit routing.');
+      } else if(d.workingAtTime === 'Y'){
+        protocol = "Workmen's Compensation";
+        rationale.push("The patient was working at the time of a weekday incident — this routes to Workers' Compensation instead of defaulting to a plain Regular Appointment.");
+        if(d.drivingForWork === 'Y') notes.push({text:"Patient was also driving as part of job duties at the time — reinforces the Workers' Compensation classification."});
+        if(!d.companyName) notes.push({text:"Employer name, address, and manager not yet captured — required before the visit can be billed to the employer."});
+      } else {
+        protocol = "Regular Appointment";
+        durationOverride = "30 minutes";
+        rationale.push('Per policy, an approved New Patient status routes directly to a Regular Appointment (~30 minutes) for the first visit.');
+      }
+    }
+
+    /* ---- Tier 2: brand-new patient gate (only if no status flag resolved it) ---- */
+    if(!protocol && isNew && (!d.status || d.status === 'NA')){
+      protocol = "New Patient Establishing Care";
+      rationale.push('Marked as a new patient with no New Patient form on file yet.');
+      if(urgent) notes.push({text:'Caller reports intolerable/worsening pain — since care is not yet established here, advise the nearest Emergency Room or an urgent care clinic for immediate symptoms.', danger:true});
+    }
+
+    /* ---- Tier 3: established-patient normal flow ---- */
+    if(!protocol){
+      if(urgent){
+        protocol = "Same-Day Appointment";
+        let why;
+        if(d.tolerability === 'I' && painNum >= 7) why = 'Pain marked intolerable and scored ' + painNum + '/10 (at or above the threshold of 7)';
+        else if(d.tolerability === 'I') why = 'Pain marked intolerable' + (painNum ? ' (scale ' + painNum + '/10)' : '');
+        else why = 'Pain scale scored ' + painNum + '/10 — at or above the ≥7 override threshold, regardless of tolerability';
+        rationale.push(why + ' — the Cross-Protocol Transition Principle overrides the original purpose of call.');
+        if(d.purpose && d.purpose !== 'schedule'){
+          notes.push({text:'Originally logged under "' + purposeLabel(d.purpose) + '" — continue addressing that request once the same-day visit is complete.'});
+        }
+      } else if(hasBeenER){
+        protocol = "Hospital/ER Follow-up Appointment";
+        rationale.push("Caller confirmed a prior ER/hospital visit — routes to follow-up, overriding MVA / Workers' Comp / lab-order defaults per the Cross-Protocol Transition Principle.");
+      } else if(d.workingAtTime === 'Y'){
+        protocol = "Workmen's Compensation";
+        rationale.push("Patient was working at the time of the incident on a weekday — per policy this reclassifies the call to Workers' Compensation, overriding the original purpose of call. (Only a pain scale of 7+ or intolerable pain — Same-Day Appointment — takes priority over this.)");
+        if(d.purpose === 'mva') notes.push({text:"Originally logged as a Motor Vehicle Accident — since the patient was working at the time, this routes to Workers' Compensation instead. If it's later confirmed the incident was unrelated to work duties, revert to the MVA Appointment protocol."});
+        if(d.drivingForWork === 'Y') notes.push({text:'Patient was also driving as part of job duties at the time — reinforces the Workers\' Compensation classification.'});
+        if(!d.companyName) notes.push({text:"Employer name, address, and manager not yet captured — required before the visit can be billed to the employer."});
+      } else if(d.forThirdPartyReferral === 'Y' || d.purpose === 'third_party_referral'){
+        protocol = "Referral for a Third Party";
+        rationale.push('Flagged as a Third-Party Referral coordination call.');
+        if(d.withClinicalsLabRad === 'Y') notes.push({text:'Clinicals/lab/rad records already on file for the mutual patient — proceed with processing.'});
+        else if(d.withClinicalsLabRad === 'N') notes.push({text:'Clinicals not yet received for the mutual patient — request them before processing the referral.'});
+        if(d.referralFacilityName) notes.push({text:'Referral facility on file: ' + d.referralFacilityName + '.'});
+      } else if(d.purpose === 'referral' || d.forReferral === 'Y'){
+        const resolvedFirstTime = d.firstTimeReferral || (d.seenByDrHello === 'N' ? 'Y' : (d.seenByDrHello === 'Y' ? 'N' : null));
+        if(resolvedFirstTime === 'N'){
+          const criteriaMet = d.sameFacility === 'Y' && d.sameDiagnosis === 'Y' && d.encounterNotesWithin12mo === 'Y';
+          if(!criteriaMet){
+            const failed = [
+              d.sameFacility !== 'Y' ? 'same facility' : null,
+              d.sameDiagnosis !== 'Y' ? 'same diagnosis' : null,
+              d.encounterNotesWithin12mo !== 'Y' ? 'encounter notes within 12 months' : null
+            ].filter(Boolean).join(', ');
+            protocol = "Referral";
+            rationale.push('Caller has seen this specialist before, but the Recurrent Referral criteria were not fully met (failed: ' + (failed || 'unspecified') + ') — routes to a new Referral appointment with Doctor ______ instead.');
+          } else if(d.priorAuthExpired === 'N'){
+            protocol = "Recurrent Referral";
+            rationale.push('All Recurrent Referral criteria met (same facility, same diagnosis, notes within 12 months), and prior authorization is still valid.');
+            notes.push({text:'Prior authorization has not expired — no further action needed from ClinicalHealth. The caller is welcome to call the facility directly to schedule.'});
+          } else {
+            protocol = "Recurrent Referral";
+            rationale.push('All Recurrent Referral criteria met and prior authorization has expired — eligible to submit as a recurrent referral.');
+          }
+        } else if(resolvedFirstTime === 'Y'){
+          protocol = "Referral";
+          rationale.push('First-time referral for this concern.');
+          if(d.withReferralMessage === 'Y') notes.push({text:'A referral message/note from Doctor ______ is already on file — process directly rather than scheduling a new evaluation.'});
+        } else {
+          protocol = "Referral";
+          rationale.push('Purpose of call = Referral Request (first-time vs. recurrent not yet confirmed — defaulting to a new Referral appointment).');
+        }
+        if(d.referralFacilityName) notes.push({text:'Referral facility on file: ' + d.referralFacilityName + '.'});
+        if(d.sameReferralFacility === 'N') notes.push({text:'Caller indicated this is a different facility than previously discussed — confirm the correct facility before processing.'});
+      } else {
+        switch(d.purpose){
+          case 'mva': {
+            protocol = "MVA Appointment";
+            rationale.push('Purpose of call = Motor Vehicle Accident.');
+            if(hasCommercial && !hasMedicare && !hasAHCCCS) notes.push({text:'Only commercial insurance on file (' + insuranceLabel + ') — MVA visits are not covered by commercial plans; this will be an out-of-pocket expense unless Medicare/AHCCCS applies.'});
+            break;
+          }
+          case 'workcomp': {
+            protocol = "Workmen's Compensation";
+            rationale.push("Purpose of call = Workers' Compensation.");
+            if(!d.companyName) notes.push({text:"Employer name, address, and manager not yet captured — required before the visit can be billed to the employer."});
+            if(d.workingAtTime === 'N') notes.push({text:'Caller indicated they were not working at the time of the incident on a weekday — verify this still qualifies as a workplace injury before proceeding.'});
+            break;
+          }
+          case 'preop': {
+            protocol = "Preoperative Clearance";
+            rationale.push('Purpose of call = Preoperative Clearance.');
+            if(d.preopClinicals === 'Y'){
+              notes.push({text:'Clinicals already received.'});
+              if(d.preopOperationDate){
+                const opDate = new Date(d.preopOperationDate + 'T00:00:00');
+                const today = new Date(); today.setHours(0,0,0,0);
+                const idealPreop = new Date(opDate); idealPreop.setDate(idealPreop.getDate() - 14);
+                const idealStr = idealPreop.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'2-digit'});
+                const opStr = opDate.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'2-digit'});
+                const leadDays = Math.round((opDate - today) / 86400000);
+                if(leadDays < 14){
+                  notes.push({text:'Only ' + leadDays + ' day(s) remain before the operation on ' + opStr + ' — not enough lead time for the required 14-day pre-op window. Advise the patient to contact the surgeon\'s office to discuss rescheduling the operation date.', danger:true});
+                } else {
+                  notes.push({text:'Book the pre-op visit for exactly ' + idealStr + ' — 14 days before the operation on ' + opStr + '. Scheduling it sooner or later than that date breaks the required lab/testing window; if that exact date is not open, ask whether the operation date can move instead of shifting the pre-op visit off the 14-day mark.'});
+                }
+              } else {
+                notes.push({text:'Operation date not yet captured — collect it to confirm the pre-op appointment lands exactly 14 days beforehand.'});
+              }
+            } else {
+              notes.push({text:"Clinicals not yet received — ask the surgeon's office to fax paperwork to 520-439-4466 before scheduling."});
+            }
+            if(d.preopFacilityName || d.preopSurgeonName || d.preopProcedureName){
+              notes.push({text:'On file: Facility — ' + (d.preopFacilityName || '—') + '; Surgeon — ' + (d.preopSurgeonName || '—') + '; Procedure — ' + (d.preopProcedureName || '—') + '.'});
+            }
+            break;
+          }
+          case 'medication': {
+            const wantsControlled = /controlled|refill/i.test(d.cc || '');
+            protocol = wantsControlled ? "Controlled Substances" : "New Medication";
+            rationale.push('Purpose of call = Medication Request' + (wantsControlled ? ' — chief complaint references a controlled-substance refill.' : '.'));
+            if(d.medsTaken === 'Y' && d.medsName) notes.push({text:'Current medication(s) per caller: ' + d.medsName + '.'});
+            break;
+          }
+          case 'lab_order': {
+            protocol = "New Radiology/Laboratory Order";
+            rationale.push('Purpose of call = Lab / Radiology Order Request.');
+            if(/accident|mva|crash|collision/i.test(d.cc || '')){
+              protocol = "MVA Appointment";
+              notes.push({text:'Lab/radiology reason relates to a motor vehicle accident — rerouted to the MVA Appointment protocol per the Cross-Protocol Transition Principle.'});
+            }
+            if(d.seenByDrHello === 'N') notes.push({text:'This has not yet been discussed with Doctor ______ — an appointment is required before the order can be processed.'});
+            break;
+          }
+          case 'cancel': protocol = "Appointment Cancellation"; rationale.push('Purpose of call = Cancel Appointment.'); break;
+          case 'reschedule': protocol = "Rescheduling"; rationale.push('Purpose of call = Reschedule Appointment.'); break;
+          case 'confirm': protocol = "Appointment Confirmation"; rationale.push('Purpose of call = Confirm Appointment.'); break;
+          case 'termination_followup': protocol = "Patient Termination Notification"; rationale.push('Purpose of call = Termination Notice Follow-up.'); break;
+          case 'tb': protocol = "TB Testing"; rationale.push('Purpose of call = TB Testing.'); break;
+          case 'referral_status': {
+            protocol = "Referral and Order Status";
+            rationale.push('Purpose of call = Referral / Order Status Check.');
+            if(d.withClinicalsLabRad === 'Y') notes.push({text:'Clinicals on file — if the referral is approved, the caller may schedule directly with the specialist.'});
+            break;
+          }
+          case 'mrr': protocol = "Medical Records Request (MRR) Call"; rationale.push('Purpose of call = Medical Records Request.'); break;
+          case 'deceased': protocol = "Deceased Patient Protocol"; rationale.push('Purpose of call = Deceased Patient Notification.'); break;
+          case 'nonauth': protocol = "HIPAA Compliance"; rationale.push('Purpose of call = Information Request from a Non-Authorized Party.'); break;
+          case 'insurance_verif': protocol = "Insurance Verification"; rationale.push('Purpose of call = Outbound Insurance Verification.'); break;
+          case 'recommendations': protocol = "Recommendations"; rationale.push('Purpose of call = Results / Recommendation Follow-up.'); break;
+          case 'workform': protocol = "Work Notes/FORMS"; rationale.push('Purpose of call = Work Note / Form Request.'); break;
+          case 'vaccination': protocol = "Vaccination"; rationale.push('Purpose of call = Vaccination Request.'); break;
+          case 'establish':
+          case 'schedule':
+          case '':
+          case undefined:
+          default: {
+            if(hasMedicare && age !== null && age >= 65){
+              protocol = "Medicare Wellness";
+              rationale.push('Medicare on file and patient age ' + age + ' (65+) — eligible for a Medicare Wellness Visit.');
+            } else if((hasMedicare || hasAHCCCS) && age !== null && age < 65){
+              rationale.push('Medicare/AHCCCS on file with patient age ' + age + ' (under 65) — routing is limited to MVA, Same-Day, or Annual Physical per policy, based on chief complaint.');
+              if(/annual|physical|wellness|check[\s-]?up/i.test(d.cc || '')){
+                protocol = "Annual Physical";
+              } else {
+                protocol = "Same-Day Appointment";
+                notes.push({text:'No urgent symptom and no annual-exam language in the chief complaint — confirm the visit reason with the caller; Medicare/AHCCCS under 65 does not route to a standard Regular Appointment.'});
+              }
+            } else if(/annual|physical|wellness|check[\s-]?up/i.test(d.cc || '')){
+              protocol = "Annual Physical";
+              rationale.push('Chief complaint indicates a routine annual/wellness exam.');
+            } else {
+              protocol = "Regular Appointment";
+              rationale.push('No more specific condition applied — defaulting to a standard Regular Appointment, per the workbook\'s own documented default.');
+            }
+          }
+        }
+      }
+    }
+
+    /* ---- Work Note / Form combinability (applies on top of whichever protocol was determined) ---- */
+    const wantsForm = d.purpose === 'workform' || d.forOtherForm === 'Y';
+    if(protocol === 'Work Notes/FORMS' && d.formType){
+      notes.push({text:'Form requested: ' + d.formType + '.'});
+    } else if(wantsForm && protocol !== 'Work Notes/FORMS'){
+      const formLabel = d.formType || 'requested form';
+      const blockedForms = ["MVA Appointment", "Workmen's Compensation", "Hospital/ER Follow-up Appointment"];
+      if(blockedForms.includes(protocol)){
+        notes.push({text:'A Work Note/Form (' + formLabel + ') cannot be combined with ' + protocol + ' — this is a standalone visit type. Schedule the form as its own separate Work Notes/FORMS appointment.', danger:true});
+      } else if(protocol === 'Same-Day Appointment'){
+        notes.push({text:'The requested form (' + formLabel + ') can only be combined with this Same-Day Appointment if it relates to the same chief complaint' + (d.cc ? ' ("' + d.cc + '")' : '') + '. If unrelated, schedule it as a separate Work Notes/FORMS visit.'});
+      } else {
+        notes.push({text:'This visit can also include the requested ' + formLabel + ' — combine it with the ' + protocol + ' appointment.'});
+      }
+    }
+
+    if(durationOverride) notes.push({text:'Visit length: ' + durationOverride + '.'});
+
+    if(!rationale.length) rationale.push('Purpose of call = ' + purposeLabel(d.purpose) + '.');
+
+    const meta = PROTOCOLS[protocol] || PROTOCOLS["Regular Appointment"];
+
+    // token substitution
+    function fill(line){
+      let out = line;
+      if(d.patientName) out = out.split('[PATIENT NAME]').join(d.patientName);
+      if(insurances.length) out = out.split('[INSURANCE ON FILE]').join(insuranceLabel);
+      if(durationOverride) out = out.split('[DURATION]').join(durationOverride);
+      return out;
+    }
+    const resolution = meta.resolution.map(fill);
+
+    // confidence heuristic
+    const filledSignals = [
+      d.patientName, d.patientDOB, (d.established || d.newPatient), d.purpose,
+      d.cc, d.tolerability, (d.recentlyAdmitted || d.atER), (insurances.length ? 'y' : '')
+    ].filter(Boolean).length;
+    const confidence = filledSignals >= 6 ? 'High' : filledSignals >= 4 ? 'Medium' : 'Low';
+
+    return {
+      protocol, cluster: meta.cluster, recap: meta.recap, multi: meta.multi,
+      when: meta.when, resolution, rationale, notes, confidence
+    };
+  }
+
+  /* =====================================================================
+     RENDER
+     ===================================================================== */
+  const resultsEl = document.getElementById('results');
+  function render(result){
+    document.getElementById('resCluster').textContent = result.cluster.toUpperCase();
+    document.getElementById('resProtocol').textContent = result.protocol;
+    const confEl = document.getElementById('resConfidence');
+    confEl.textContent = 'Confidence: ' + result.confidence;
+    confEl.className = 'pill conf-' + result.confidence.toLowerCase();
+    document.getElementById('resRecap').textContent = 'Recap required: ' + (result.recap ? 'Yes' : 'No');
+    document.getElementById('resMulti').textContent = 'Multi-layer probing: ' + (result.multi ? 'Yes' : 'No');
+    document.getElementById('resWhen').textContent = result.when;
+
+    const rEl = document.getElementById('resRationale');
+    rEl.innerHTML = '';
+    result.rationale.forEach(function(r){
+      const li = document.createElement('li'); li.textContent = r; rEl.appendChild(li);
+    });
+
+    const notesWrap = document.getElementById('resNotesWrap');
+    const nEl = document.getElementById('resNotes');
+    nEl.innerHTML = '';
+    if(result.notes.length){
+      notesWrap.style.display = 'block';
+      result.notes.forEach(function(n){
+        const li = document.createElement('li');
+        li.textContent = n.text;
+        if(n.danger) li.classList.add('danger');
+        nEl.appendChild(li);
+      });
+    } else {
+      notesWrap.style.display = 'none';
+    }
+
+    const sEl = document.getElementById('resScript');
+    sEl.innerHTML = '';
+    result.resolution.forEach(function(line){
+      const li = document.createElement('li'); li.textContent = line; sEl.appendChild(li);
+    });
+
+    resultsEl.classList.add('show');
+    resultsEl.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  document.getElementById('determineBtn').addEventListener('click', function(){
+    const data = readForm();
+    const result = decide(data);
+    render(result);
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', function(){
+    if(!confirm('Clear the entire checklist for a new call?')) return;
+    document.querySelectorAll('input[type=text], input[type=date], textarea').forEach(function(el){ el.value=''; });
+    document.querySelectorAll('.insChk').forEach(function(c){ c.checked=false; });
+    document.querySelectorAll('.segmented button').forEach(function(b){ b.classList.remove('active','no'); });
+    Object.keys(state).forEach(function(k){ state[k] = (k==='status') ? 'NA' : (k==='painScale' ? 1 : null); state.cc=''; state.companyName=''; state.companyAddress=''; state.companyManager=''; state.medsName=''; state.purpose=''; });
+    document.getElementById('status').value = 'NA';
+    document.getElementById('purpose').value = '';
+    document.getElementById('formType').value = '';
+    painInput.value = 1; painValue.textContent = '1';
+    whenFollowup.classList.remove('show');
+    whereFollowup.classList.remove('show');
+    medsFollowup.classList.remove('show');
+    preopFollowup.classList.remove('show');
+    formTypeFollowup.classList.remove('show');
+    urgentFlag.classList.remove('show');
+    resultsEl.classList.remove('show');
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+
+  document.getElementById('copyBtn').addEventListener('click', function(){
+    const lines = Array.from(document.querySelectorAll('#resScript li')).map(function(li,i){ return (i+1)+'. '+li.textContent; });
+    const text = document.getElementById('resProtocol').textContent + '\n\n' + lines.join('\n');
+    navigator.clipboard.writeText(text).then(function(){
+      const btn = document.getElementById('copyBtn');
+      const original = btn.textContent;
+      btn.textContent = 'Copied ✓';
+      setTimeout(function(){ btn.textContent = original; }, 1600);
+    });
+  });
+
+  document.getElementById('printBtn').addEventListener('click', function(){ window.print(); });
+
+})();
+</script>
+</body>
+</html>
