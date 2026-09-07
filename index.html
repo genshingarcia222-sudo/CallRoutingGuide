@@ -999,7 +999,7 @@
         <div class="resultbody">
           <p class="whentouse" id="resWhen"></p>
 
-          <p class="subhead">Why this protocol</p>
+          <p class="subhead" id="resRationaleLabel">Why this protocol</p>
           <ul class="rationale" id="resRationale"></ul>
 
           <div id="resNotesWrap">
@@ -1007,7 +1007,7 @@
             <ul class="notes" id="resNotes"></ul>
           </div>
 
-          <p class="subhead">Resolution — what to do</p>
+          <p class="subhead" id="resScriptLabel">Resolution — what to do</p>
           <ol class="script" id="resScript"></ol>
         </div>
         <div class="resultfoot">
@@ -1193,6 +1193,7 @@
     document.getElementById('standardFlowSections').style.display = isIV ? 'none' : '';
     document.querySelectorAll('.std-nav').forEach(function(li){ li.style.display = isIV ? 'none' : ''; });
     document.querySelectorAll('.iv-nav').forEach(function(li){ li.style.display = isIV ? '' : 'none'; });
+    document.getElementById('determineBtn').textContent = isIV ? 'Apply' : 'Determine Protocol';
     if(isIV) lockDateOfService();
   }
 
@@ -1637,54 +1638,65 @@
     };
   }
 
+  function buildRecapChecklist(d){
+    function line(label, value){
+      return value ? (label + ': ' + value) : (label + ': — not captured');
+    }
+    const items = [];
+    items.push(line('Outbound caller', (d.outboundCallerName || '') + (d.outboundCallerInitial ? ' ' + d.outboundCallerInitial + '.' : '')));
+    items.push(line('Insurance receiver', (d.insuranceReceiverName || '') + (d.insuranceReceiverInitial ? ' ' + d.insuranceReceiverInitial + '.' : '')));
+    items.push(line('Call ID / Reference #', d.callIdRef));
+    items.push(line('Provider NPI', d.providerNPI));
+    items.push(line('Provider', d.providerName));
+    items.push(line('Facility', d.ivFacility));
+    items.push(line('State License #', d.stateLicenseNum));
+    items.push(line('Tax #', d.taxNum));
+    items.push(line('Patient Name', d.patientName));
+    items.push(line('Date of Birth', d.patientDOB));
+    items.push(line('Primary Insurance', d.primaryInsurance));
+    items.push(line('Member ID', d.memberID));
+    items.push(line('Group ID', d.groupID));
+    items.push(line('Date of Service', d.dateOfService));
+    items.push(line('Does patient have other insurance?', d.ivOtherInsuranceEarly));
+    items.push(line('In-Network with the clinic?', d.inNetwork));
+    if(d.inNetwork === 'Y'){
+      items.push(line('Active/Inactive', d.activeStatus));
+    } else if(d.inNetwork === 'N'){
+      items.push('Treat as Out-of-Pocket Expense (out-of-network)');
+      items.push(line('Out-of-Network Benefits?', d.oonBenefits));
+      if(d.oonBenefits === 'Y') items.push(line('Benefits listed', d.oonBenefitsList));
+    }
+    items.push(line('Insurance Type', d.insuranceType));
+    items.push(line('Plan Type', d.planType));
+    items.push(line('Self-pay / Dependent', d.selfPayDependent === 'SP' ? 'Self-pay' : d.selfPayDependent === 'D' ? 'Dependent' : ''));
+    items.push(line('Other Insurance Coverage?', d.ivOtherInsuranceLater));
+    items.push(line('Individual Deductible', d.individualDeductible ? '$' + d.individualDeductible : ''));
+    items.push(line('Deductible Met Amount', d.deductibleMetAmount ? '$' + d.deductibleMetAmount : ''));
+    items.push(line('Co-Insurance (Plan/Patient %)', (d.coInsurancePlanPct || d.coInsurancePatientPct) ? (d.coInsurancePlanPct || '—') + '/' + (d.coInsurancePatientPct || '—') + '%' : ''));
+    items.push(line('Out-of-Pocket Maximum', d.oopMax ? '$' + d.oopMax : ''));
+    items.push(line('OOP Met Amount', d.oopMetAmount ? '$' + d.oopMetAmount : ''));
+    items.push(line('Copay — PCP Office Visit', d.copayPCP ? '$' + d.copayPCP : ''));
+    items.push(line('Copay — Specialist Visit', d.copaySpecialist ? '$' + d.copaySpecialist : ''));
+    items.push(line('Dental / Visual Coverage', d.covDentalVisual));
+    items.push(line('Preventative Services Coverage', d.covPreventative));
+    items.push(line('DME / Mobile Service Coverage', d.covDME));
+    items.push(line('Physical Therapy Coverage', d.covPT));
+    return items;
+  }
+
   function decideInsuranceVerification(d){
-    const rationale = ['Purpose of call = Outbound Insurance Verification.'];
+    const rationale = ['Call documented as Outbound Insurance Verification — recap generated below from the entries made.'];
     const notes = [];
 
-    if(d.providerName || d.ivFacility || d.providerNPI){
-      notes.push({text:'Verifying on behalf of ' + (d.providerName || 'Doctor ______') + (d.ivFacility ? ' at ' + d.ivFacility : '') + (d.providerNPI ? ' (NPI ' + d.providerNPI + ')' : '') + '.'});
-    }
-    if(d.patientName || d.memberID || d.primaryInsurance){
-      notes.push({text:'Member: ' + (d.patientName || '[PATIENT NAME]') + (d.patientDOB ? ', DOB ' + d.patientDOB : '') + (d.primaryInsurance ? ' — ' + d.primaryInsurance : '') + (d.memberID ? ', member ID ' + d.memberID : '') + (d.groupID ? ', group ' + d.groupID : '') + '.'});
-    }
-    if(d.dateOfService) notes.push({text:'Date of service: ' + d.dateOfService + '.'});
-
     if(d.inNetwork === 'Y'){
-      notes.push({text:'Patient is in-network' + (d.activeStatus ? ' — status: ' + d.activeStatus : ' — confirm Active/Inactive status') + '.'});
+      notes.push({text:'Patient is in-network' + (d.activeStatus ? ' — status: ' + d.activeStatus : ' — confirm Active/Inactive status before ending the call') + '.'});
     } else if(d.inNetwork === 'N'){
       notes.push({text:'Patient is out-of-network — treat this service as an Out-of-Pocket Expense.', danger:true});
       if(d.oonBenefits === 'Y') notes.push({text:'Out-of-network benefits apply' + (d.oonBenefitsList ? ': ' + d.oonBenefitsList : ' — document the specific benefits') + '.'});
       else if(d.oonBenefits === 'N') notes.push({text:'No out-of-network benefits on file — full cost is out-of-pocket.'});
     }
-
-    const planBits = [
-      d.insuranceType ? 'Type: ' + d.insuranceType : null,
-      d.planType ? 'Plan: ' + d.planType : null,
-      d.selfPayDependent ? (d.selfPayDependent === 'SP' ? 'Self-pay' : 'Dependent coverage') : null
-    ].filter(Boolean);
-    if(planBits.length) notes.push({text: planBits.join(' · ') + '.'});
-
     if(d.ivOtherInsuranceEarly === 'Y' || d.ivOtherInsuranceLater === 'Y'){
       notes.push({text:'Caller confirmed additional insurance coverage beyond the primary plan — verify coordination of benefits (which plan is primary).'});
-    }
-
-    const moneyBits = [];
-    if(d.individualDeductible) moneyBits.push('Deductible $' + d.individualDeductible + (d.deductibleMetAmount ? ' (met $' + d.deductibleMetAmount + ')' : ''));
-    if(d.coInsurancePlanPct || d.coInsurancePatientPct) moneyBits.push('Co-insurance ' + (d.coInsurancePlanPct || '—') + '/' + (d.coInsurancePatientPct || '—') + '%');
-    if(d.oopMax) moneyBits.push('OOP max $' + d.oopMax + (d.oopMetAmount ? ' (met $' + d.oopMetAmount + ')' : ''));
-    if(d.copayPCP) moneyBits.push('PCP copay $' + d.copayPCP);
-    if(d.copaySpecialist) moneyBits.push('Specialist copay $' + d.copaySpecialist);
-    if(moneyBits.length) notes.push({text: moneyBits.join(' · ') + '.'});
-
-    const coverageBits = [];
-    if(d.covDentalVisual) coverageBits.push('Dental/Visual: ' + d.covDentalVisual);
-    if(d.covPreventative) coverageBits.push('Preventive: ' + d.covPreventative);
-    if(d.covDME) coverageBits.push('DME/Mobile: ' + d.covDME);
-    if(d.covPT) coverageBits.push('Physical Therapy: ' + d.covPT);
-    if(coverageBits.length) notes.push({text:'Additional coverage — ' + coverageBits.join(', ') + '.'});
-
-    if(d.outboundCallerName || d.insuranceReceiverName || d.callIdRef){
-      notes.push({text:'Documented by: ' + (d.outboundCallerName || '[AGENT]') + (d.outboundCallerInitial ? ' ' + d.outboundCallerInitial + '.' : '') + '; insurance rep: ' + (d.insuranceReceiverName || '[REP]') + (d.insuranceReceiverInitial ? ' ' + d.insuranceReceiverInitial + '.' : '') + (d.callIdRef ? '; reference #' + d.callIdRef : '') + '.'});
     }
 
     const meta = PROTOCOLS["Insurance Verification"];
@@ -1693,7 +1705,8 @@
 
     return {
       protocol: "Insurance Verification", cluster: meta.cluster, recap: meta.recap, multi: meta.multi,
-      when: meta.when, resolution: meta.resolution, rationale, notes, confidence
+      when: 'Read this checklist back to the caller to confirm accuracy before ending the call.',
+      resolution: buildRecapChecklist(d), rationale, notes, confidence, isRecap: true
     };
   }
 
@@ -1976,15 +1989,19 @@
   const resultsEl = document.getElementById('results');
   function render(result){
     document.getElementById('resCluster').textContent = result.cluster.toUpperCase();
-    document.getElementById('resProtocol').textContent = result.protocol;
+    document.getElementById('resProtocol').textContent = result.isRecap ? 'Call Recap Checklist' : result.protocol;
     const confEl = document.getElementById('resConfidence');
     confEl.textContent = 'Confidence: ' + result.confidence;
     confEl.className = 'pill conf-' + result.confidence.toLowerCase();
+    document.getElementById('resRecap').style.display = result.isRecap ? 'none' : '';
+    document.getElementById('resMulti').style.display = result.isRecap ? 'none' : '';
     document.getElementById('resRecap').textContent = 'Recap required: ' + (result.recap ? 'Yes' : 'No');
     document.getElementById('resMulti').textContent = 'Multi-layer probing: ' + (result.multi ? 'Yes' : 'No');
     document.getElementById('resWhen').textContent = result.when;
 
+    document.getElementById('resRationaleLabel').style.display = result.isRecap ? 'none' : '';
     const rEl = document.getElementById('resRationale');
+    rEl.style.display = result.isRecap ? 'none' : '';
     rEl.innerHTML = '';
     result.rationale.forEach(function(r){
       const li = document.createElement('li'); li.textContent = r; rEl.appendChild(li);
@@ -2005,6 +2022,8 @@
       notesWrap.style.display = 'none';
     }
 
+    document.getElementById('resScriptLabel').textContent = result.isRecap ? 'Call Recap Checklist — read back before ending the call' : 'Resolution — what to do';
+    document.getElementById('copyBtn').textContent = result.isRecap ? 'Copy recap to clipboard' : 'Copy resolution to clipboard';
     const sEl = document.getElementById('resScript');
     sEl.innerHTML = '';
     result.resolution.forEach(function(line){
