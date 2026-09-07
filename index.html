@@ -407,12 +407,13 @@
     <ol>
       <li><a href="#sec-id" class="jl">Caller &amp; Patient</a></li>
       <li><a href="#sec-purpose" class="jl">Purpose &amp; Complaint</a></li>
-      <li><a href="#sec-incident" class="jl">Incident Details</a></li>
-      <li><a href="#sec-symptom" class="jl">Symptom Check</a></li>
-      <li><a href="#sec-history" class="jl">Medical History</a></li>
-      <li><a href="#sec-insurance" class="jl">Insurance</a></li>
-      <li><a href="#sec-employer" class="jl">Employer Info</a></li>
-      <li><a href="#sec-meds" class="jl">Medications</a></li>
+      <li class="iv-nav" style="display:none;"><a href="#sec-insverif" class="jl">Insurance Verification</a></li>
+      <li class="std-nav"><a href="#sec-incident" class="jl">Incident Details</a></li>
+      <li class="std-nav"><a href="#sec-symptom" class="jl">Symptom Check</a></li>
+      <li class="std-nav"><a href="#sec-history" class="jl">Medical History</a></li>
+      <li class="std-nav"><a href="#sec-insurance" class="jl">Insurance</a></li>
+      <li class="std-nav"><a href="#sec-employer" class="jl">Employer Info</a></li>
+      <li class="std-nav"><a href="#sec-meds" class="jl">Medications</a></li>
     </ol>
     <div class="navflag urgent" id="urgentFlag">⚠ Intolerable or ≥7 pain — Same-Day override active</div>
   </nav>
@@ -420,52 +421,80 @@
   <main>
 
     <section class="card" id="sec-id">
-      <h2>1 · Caller &amp; Patient</h2>
-      <p class="hint">P2 — confirm identity before anything else. Established / New splits the call per the New-Patient vs. Established-Patient path.</p>
-      <div class="grid2">
+      <h2 id="sec1Heading">1 · Caller &amp; Patient</h2>
+      <p class="hint" id="sec1Hint">P2 — confirm identity before anything else. Established / New splits the call per the New-Patient vs. Established-Patient path.</p>
+
+      <div id="sec-id-standard">
+        <div class="grid2">
+          <div class="field">
+            <label for="patientName">Name of Patient</label>
+            <input type="text" id="patientName" placeholder="Full legal name">
+          </div>
+          <div class="field">
+            <label for="callerName">Name of Caller</label>
+            <input type="text" id="callerName" placeholder="Full legal name">
+          </div>
+          <div class="field">
+            <label for="patientDOB">Date of Birth — Patient</label>
+            <input type="date" id="patientDOB">
+          </div>
+          <div class="field">
+            <label for="callerDOB">Date of Birth — Caller</label>
+            <input type="date" id="callerDOB">
+          </div>
+        </div>
+
         <div class="field">
-          <label for="patientName">Name of Patient</label>
-          <input type="text" id="patientName" placeholder="Full legal name">
+          <label>Established?</label>
+          <div class="segmented" data-group="established">
+            <button type="button" data-val="Y">Y</button>
+            <button type="button" data-val="N">N</button>
+          </div>
         </div>
         <div class="field">
-          <label for="callerName">Name of Caller</label>
-          <input type="text" id="callerName" placeholder="Full legal name">
+          <label>New?</label>
+          <div class="segmented" data-group="newPatient">
+            <button type="button" data-val="Y">Y</button>
+            <button type="button" data-val="N">N</button>
+          </div>
         </div>
         <div class="field">
-          <label for="patientDOB">Date of Birth — Patient</label>
-          <input type="date" id="patientDOB">
-        </div>
-        <div class="field">
-          <label for="callerDOB">Date of Birth — Caller</label>
-          <input type="date" id="callerDOB">
+          <label for="status">Status <span class="sub">(chart / NP form flag — leave N/A if none applies)</span></label>
+          <select id="status">
+            <option value="NA">N/A — no flag on chart</option>
+            <option value="P">P — Processing (NP form pending)</option>
+            <option value="A">A — Approved</option>
+            <option value="D">D — Denied</option>
+            <option value="T">T — Termed</option>
+            <option value="CE">CE — Clearance Expired</option>
+            <option value="3y">3y — Not seen in 3+ years</option>
+          </select>
         </div>
       </div>
 
-      <div class="field">
-        <label>Established?</label>
-        <div class="segmented" data-group="established">
-          <button type="button" data-val="Y">Y</button>
-          <button type="button" data-val="N">N</button>
+      <div id="sec-id-insurance" style="display:none;">
+        <div class="grid2">
+          <div class="field">
+            <label for="outboundCallerName">Name of the Outbound caller</label>
+            <input type="text" id="outboundCallerName" placeholder="Agent full name">
+          </div>
+          <div class="field">
+            <label for="outboundCallerInitial">Last name initial</label>
+            <input type="text" id="outboundCallerInitial" maxlength="1" placeholder="e.g. R">
+          </div>
+          <div class="field">
+            <label for="insuranceReceiverName">Name of the Insurance Inbound receiver</label>
+            <input type="text" id="insuranceReceiverName" placeholder="Insurance rep's name">
+          </div>
+          <div class="field">
+            <label for="insuranceReceiverInitial">Last name initial</label>
+            <input type="text" id="insuranceReceiverInitial" maxlength="1" placeholder="e.g. T">
+          </div>
         </div>
-      </div>
-      <div class="field">
-        <label>New?</label>
-        <div class="segmented" data-group="newPatient">
-          <button type="button" data-val="Y">Y</button>
-          <button type="button" data-val="N">N</button>
+        <div class="field">
+          <label for="callIdRef">Call ID or Reference Number</label>
+          <input type="text" id="callIdRef" placeholder="Confirmation / reference #">
         </div>
-      </div>
-      <div class="field">
-        <label for="status">Status <span class="sub">(chart / NP form flag — leave N/A if none applies)</span></label>
-        <select id="status">
-          <option value="NA">N/A — no flag on chart</option>
-          <option value="P">P — Processing (NP form pending)</option>
-          <option value="A">A — Approved</option>
-          <option value="D">D — Denied</option>
-          <option value="T">T — Termed</option>
-          <option value="CE">CE — Clearance Expired</option>
-          <option value="3y">3y — Not seen in 3+ years</option>
-        </select>
       </div>
     </section>
 
@@ -500,31 +529,223 @@
           <option value="vaccination">Vaccination Request</option>
         </select>
       </div>
-      <div class="field">
+      <div class="callout" id="ivModeNotice" style="display:none; margin-top:10px;">Outbound Insurance Verification selected — the checklist below has switched to the insurance-verification worksheet (Section 3).</div>
+      <div class="field" id="ccField">
         <label for="cc">CC <span class="sub">(chief complaint — what the patient describes in their own words)</span></label>
         <textarea id="cc" placeholder="e.g. lower back pain since Tuesday, wants annual physical, needs refill of..."></textarea>
       </div>
-      <div class="field">
+      <div class="field" id="formRequestField">
         <label>Also requesting a Work Note / Form? <span class="sub">(separate from the Reason of Call above — can apply alongside any determined protocol, with exclusions noted in the result)</span></label>
         <div class="segmented" data-group="forOtherForm">
           <button type="button" data-val="Y">Y</button>
           <button type="button" data-val="N">N</button>
         </div>
-      </div>
-      <div class="conditional" id="formTypeFollowup">
-        <label for="formType">What form?</label>
-        <select id="formType">
-          <option value="">— Select —</option>
-          <option value="FMLA">FMLA</option>
-          <option value="Disability Forms">Disability Forms</option>
-          <option value="Medical Clearance Forms">Medical Clearance Forms</option>
-          <option value="Work Notes">Work Notes</option>
-          <option value="School Physical Forms">School Physical Forms</option>
-        </select>
-        <div class="callout">Not combinable with MVA, Workers' Comp, or Hospital/ER Follow-up. Combinable with Same-Day only if the form relates to that visit's chief complaint.</div>
+        <div class="conditional" id="formTypeFollowup">
+          <label for="formType">What form?</label>
+          <select id="formType">
+            <option value="">— Select —</option>
+            <option value="FMLA">FMLA</option>
+            <option value="Disability Forms">Disability Forms</option>
+            <option value="Medical Clearance Forms">Medical Clearance Forms</option>
+            <option value="Work Notes">Work Notes</option>
+            <option value="School Physical Forms">School Physical Forms</option>
+          </select>
+          <div class="callout">Not combinable with MVA, Workers' Comp, or Hospital/ER Follow-up. Combinable with Same-Day only if the form relates to that visit's chief complaint.</div>
+        </div>
       </div>
     </section>
 
+    <section class="card" id="sec-insverif" style="display:none;">
+      <h2>3 · Outbound Insurance Verification Worksheet</h2>
+      <p class="hint">Complete this while the insurance representative is on the line.</p>
+
+      <p class="subhead">Provider / Facility</p>
+      <div class="grid2">
+        <div class="field">
+          <label for="providerNPI">Provider NPI</label>
+          <input type="text" id="providerNPI">
+        </div>
+        <div class="field">
+          <label for="providerName">Provider</label>
+          <input type="text" id="providerName" placeholder="Doctor ______">
+        </div>
+        <div class="field">
+          <label for="ivFacility">Facility</label>
+          <input type="text" id="ivFacility">
+        </div>
+        <div class="field">
+          <label for="stateLicenseNum">State License #</label>
+          <input type="text" id="stateLicenseNum">
+        </div>
+        <div class="field">
+          <label for="taxNum">Tax #</label>
+          <input type="text" id="taxNum">
+        </div>
+      </div>
+
+      <p class="subhead" style="margin-top:18px;">Patient / Member</p>
+      <div class="grid2">
+        <div class="field">
+          <label for="ivPatientName">Patient Name</label>
+          <input type="text" id="ivPatientName">
+        </div>
+        <div class="field">
+          <label for="ivPatientDOB">Date of Birth</label>
+          <input type="date" id="ivPatientDOB">
+        </div>
+        <div class="field">
+          <label for="primaryInsurance">Primary Insurance</label>
+          <input type="text" id="primaryInsurance">
+        </div>
+        <div class="field">
+          <label for="memberID">Member ID</label>
+          <input type="text" id="memberID">
+        </div>
+        <div class="field">
+          <label for="groupID">Group ID <span class="sub">(if available)</span></label>
+          <input type="text" id="groupID">
+        </div>
+        <div class="field">
+          <label for="dateOfService">Date of Service <span class="sub">(locked to today)</span></label>
+          <input type="date" id="dateOfService" disabled>
+        </div>
+      </div>
+      <div class="field">
+        <label>Does Patient have other Insurance?</label>
+        <div class="segmented small" data-group="ivOtherInsuranceEarly">
+          <button type="button" data-val="Y">Y</button>
+          <button type="button" data-val="N">N</button>
+        </div>
+      </div>
+
+      <p class="subhead" style="margin-top:18px;">Network Status</p>
+      <div class="field">
+        <label>Is patient In-Network with the clinic?</label>
+        <div class="segmented" data-group="inNetwork">
+          <button type="button" data-val="Y">Y</button>
+          <button type="button" data-val="N">N</button>
+        </div>
+        <div class="conditional" id="inNetworkYFollowup">
+          <label>Active / Inactive?</label>
+          <div class="segmented small" data-group="activeStatus">
+            <button type="button" data-val="Active">Active</button>
+            <button type="button" data-val="Inactive">Inactive</button>
+          </div>
+        </div>
+        <div class="conditional" id="inNetworkNFollowup">
+          <div class="callout" style="margin:0 0 12px 0;">Out-of-network — treat this service as an Out-of-Pocket Expense.</div>
+          <label>Does this member have Out-of-Network Benefits?</label>
+          <div class="segmented small" data-group="oonBenefits">
+            <button type="button" data-val="Y">Y</button>
+            <button type="button" data-val="N">N</button>
+          </div>
+          <div class="conditional" id="oonBenefitsListFollowup">
+            <label for="oonBenefitsList">List benefits</label>
+            <textarea id="oonBenefitsList"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <p class="subhead" style="margin-top:18px;">Plan Details</p>
+      <div class="grid2">
+        <div class="field">
+          <label for="insuranceType">Insurance Type</label>
+          <input type="text" id="insuranceType" placeholder="e.g. HMO, PPO, EPO">
+        </div>
+        <div class="field">
+          <label>Plan Type</label>
+          <div class="segmented small" data-group="planType">
+            <button type="button" data-val="Calendar Year">Calendar Year</button>
+            <button type="button" data-val="Plan Year">Plan Year</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Self-pay / Dependent?</label>
+          <div class="segmented small" data-group="selfPayDependent">
+            <button type="button" data-val="SP">SP</button>
+            <button type="button" data-val="D">D</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Other Insurance Coverage?</label>
+          <div class="segmented small" data-group="ivOtherInsuranceLater">
+            <button type="button" data-val="Y">Y</button>
+            <button type="button" data-val="N">N</button>
+          </div>
+        </div>
+      </div>
+
+      <p class="subhead" style="margin-top:18px;">How Much</p>
+      <div class="grid2">
+        <div class="field">
+          <label for="individualDeductible">Individual Deductible ($)</label>
+          <input type="number" id="individualDeductible" min="0" step="0.01">
+        </div>
+        <div class="field">
+          <label for="deductibleMetAmount">Met Amount ($)</label>
+          <input type="number" id="deductibleMetAmount" min="0" step="0.01">
+        </div>
+        <div class="field">
+          <label>Co-Insurance <span class="sub">(Plan % / Patient %)</span></label>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="number" id="coInsurancePlanPct" min="0" max="100" style="width:90px;">
+            <span>/</span>
+            <input type="number" id="coInsurancePatientPct" min="0" max="100" style="width:90px;">
+            <span>%</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="oopMax">Out-of-Pocket Maximum ($)</label>
+          <input type="number" id="oopMax" min="0" step="0.01">
+        </div>
+        <div class="field">
+          <label for="oopMetAmount">Met Amount ($)</label>
+          <input type="number" id="oopMetAmount" min="0" step="0.01">
+        </div>
+        <div class="field">
+          <label for="copayPCP">Copay — PCP Office Visit ($)</label>
+          <input type="number" id="copayPCP" min="0" step="0.01">
+        </div>
+        <div class="field">
+          <label for="copaySpecialist">Copay — Specialist Visit ($)</label>
+          <input type="number" id="copaySpecialist" min="0" step="0.01">
+        </div>
+      </div>
+
+      <p class="subhead" style="margin-top:18px;">Insurance Coverage</p>
+      <div class="grid2">
+        <div class="field">
+          <label>Dental / Visual</label>
+          <div class="segmented small" data-group="covDentalVisual">
+            <button type="button" data-val="Y">Y</button>
+            <button type="button" data-val="N">N</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Preventative Services</label>
+          <div class="segmented small" data-group="covPreventative">
+            <button type="button" data-val="Y">Y</button>
+            <button type="button" data-val="N">N</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>DME / Mobile Service Coverage</label>
+          <div class="segmented small" data-group="covDME">
+            <button type="button" data-val="Y">Y</button>
+            <button type="button" data-val="N">N</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Physical Therapy Coverage</label>
+          <div class="segmented small" data-group="covPT">
+            <button type="button" data-val="Y">Y</button>
+            <button type="button" data-val="N">N</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="standardFlowSections">
     <section class="card" id="sec-incident">
       <h2>3 · Incident / Visit Details</h2>
       <p class="hint">Mainly relevant for MVA, Workers' Comp, and Same-Day calls — skip anything that doesn't apply.</p>
@@ -756,6 +977,7 @@
         </div>
       </div>
     </section>
+    </div>
 
     <div class="actions">
       <button class="primary" id="determineBtn">Determine Protocol</button>
@@ -829,7 +1051,11 @@
     withReferralMessage:null, withClinicalsLabRad:null, firstTimeReferral:null,
     sameReferralFacility:null, sameFacility:null, sameDiagnosis:null,
     priorAuthExpired:null, encounterNotesWithin12mo:null,
-    forOtherForm:null
+    forOtherForm:null,
+    inNetwork:null, activeStatus:null, oonBenefits:null,
+    ivOtherInsuranceEarly:null, ivOtherInsuranceLater:null,
+    planType:null, selfPayDependent:null,
+    covDentalVisual:null, covPreventative:null, covDME:null, covPT:null
   };
 
   /* ---------- segmented controls ---------- */
@@ -889,6 +1115,7 @@
   document.getElementById('purpose').addEventListener('change', function(e){
     state.purpose = e.target.value;
     refreshFormTypeVisibility();
+    refreshModeVisibility();
   });
   document.getElementById('cc').addEventListener('input', function(e){ state.cc = e.target.value; });
 
@@ -932,6 +1159,43 @@
     setTimeout(refreshFormTypeVisibility, 0);
   });
 
+  /* ---------- insurance verification: in-network / OON conditionals ---------- */
+  const inNetworkYFollowup = document.getElementById('inNetworkYFollowup');
+  const inNetworkNFollowup = document.getElementById('inNetworkNFollowup');
+  const oonBenefitsListFollowup = document.getElementById('oonBenefitsListFollowup');
+  document.querySelector('.segmented[data-group="inNetwork"]').addEventListener('click', function(){
+    setTimeout(function(){
+      inNetworkYFollowup.classList.toggle('show', state.inNetwork === 'Y');
+      inNetworkNFollowup.classList.toggle('show', state.inNetwork === 'N');
+    }, 0);
+  });
+  document.querySelector('.segmented[data-group="oonBenefits"]').addEventListener('click', function(){
+    setTimeout(function(){ oonBenefitsListFollowup.classList.toggle('show', state.oonBenefits === 'Y'); }, 0);
+  });
+
+  /* ---------- mode switch: Outbound Insurance Verification vs. standard intake ---------- */
+  function lockDateOfService(){
+    const dos = document.getElementById('dateOfService');
+    const today = new Date();
+    const iso = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+    dos.value = iso;
+  }
+  function refreshModeVisibility(){
+    const isIV = state.purpose === 'insurance_verif';
+    document.getElementById('sec-id-standard').style.display = isIV ? 'none' : '';
+    document.getElementById('sec-id-insurance').style.display = isIV ? '' : 'none';
+    document.getElementById('sec1Heading').textContent = isIV ? '1 · Outbound Caller & Insurance Rep' : '1 · Caller & Patient';
+    document.getElementById('sec1Hint').textContent = isIV ? 'Document who made and received this call, for the insurance-verification record.' : 'P2 — confirm identity before anything else. Established / New splits the call per the New-Patient vs. Established-Patient path.';
+    document.getElementById('ivModeNotice').style.display = isIV ? '' : 'none';
+    document.getElementById('ccField').style.display = isIV ? 'none' : '';
+    document.getElementById('formRequestField').style.display = isIV ? 'none' : '';
+    document.getElementById('sec-insverif').style.display = isIV ? '' : 'none';
+    document.getElementById('standardFlowSections').style.display = isIV ? 'none' : '';
+    document.querySelectorAll('.std-nav').forEach(function(li){ li.style.display = isIV ? 'none' : ''; });
+    document.querySelectorAll('.iv-nav').forEach(function(li){ li.style.display = isIV ? '' : 'none'; });
+    if(isIV) lockDateOfService();
+  }
+
   /* ---------- urgent nav flag ---------- */
   const urgentFlag = document.getElementById('urgentFlag');
   function refreshUrgentFlag(){
@@ -960,7 +1224,7 @@
   window.addEventListener('scroll', function(){
     let currentId = cards[0].id;
     cards.forEach(function(c){
-      if(window.scrollY + 120 >= c.offsetTop) currentId = c.id;
+      if(c.offsetParent !== null && window.scrollY + 120 >= c.offsetTop) currentId = c.id;
     });
     jumpLinks.forEach(function(a){
       a.classList.toggle('active', a.getAttribute('href') === '#'+currentId);
@@ -1331,6 +1595,108 @@
     };
   }
 
+  function readInsuranceVerificationForm(){
+    return {
+      outboundCallerName: document.getElementById('outboundCallerName').value.trim(),
+      outboundCallerInitial: document.getElementById('outboundCallerInitial').value.trim(),
+      insuranceReceiverName: document.getElementById('insuranceReceiverName').value.trim(),
+      insuranceReceiverInitial: document.getElementById('insuranceReceiverInitial').value.trim(),
+      callIdRef: document.getElementById('callIdRef').value.trim(),
+      providerNPI: document.getElementById('providerNPI').value.trim(),
+      providerName: document.getElementById('providerName').value.trim(),
+      ivFacility: document.getElementById('ivFacility').value.trim(),
+      stateLicenseNum: document.getElementById('stateLicenseNum').value.trim(),
+      taxNum: document.getElementById('taxNum').value.trim(),
+      patientName: document.getElementById('ivPatientName').value.trim(),
+      patientDOB: document.getElementById('ivPatientDOB').value,
+      primaryInsurance: document.getElementById('primaryInsurance').value.trim(),
+      memberID: document.getElementById('memberID').value.trim(),
+      groupID: document.getElementById('groupID').value.trim(),
+      dateOfService: document.getElementById('dateOfService').value,
+      ivOtherInsuranceEarly: state.ivOtherInsuranceEarly,
+      inNetwork: state.inNetwork,
+      activeStatus: state.activeStatus,
+      oonBenefits: state.oonBenefits,
+      oonBenefitsList: document.getElementById('oonBenefitsList').value.trim(),
+      insuranceType: document.getElementById('insuranceType').value.trim(),
+      planType: state.planType,
+      selfPayDependent: state.selfPayDependent,
+      ivOtherInsuranceLater: state.ivOtherInsuranceLater,
+      individualDeductible: document.getElementById('individualDeductible').value,
+      deductibleMetAmount: document.getElementById('deductibleMetAmount').value,
+      coInsurancePlanPct: document.getElementById('coInsurancePlanPct').value,
+      coInsurancePatientPct: document.getElementById('coInsurancePatientPct').value,
+      oopMax: document.getElementById('oopMax').value,
+      oopMetAmount: document.getElementById('oopMetAmount').value,
+      copayPCP: document.getElementById('copayPCP').value,
+      copaySpecialist: document.getElementById('copaySpecialist').value,
+      covDentalVisual: state.covDentalVisual,
+      covPreventative: state.covPreventative,
+      covDME: state.covDME,
+      covPT: state.covPT
+    };
+  }
+
+  function decideInsuranceVerification(d){
+    const rationale = ['Purpose of call = Outbound Insurance Verification.'];
+    const notes = [];
+
+    if(d.providerName || d.ivFacility || d.providerNPI){
+      notes.push({text:'Verifying on behalf of ' + (d.providerName || 'Doctor ______') + (d.ivFacility ? ' at ' + d.ivFacility : '') + (d.providerNPI ? ' (NPI ' + d.providerNPI + ')' : '') + '.'});
+    }
+    if(d.patientName || d.memberID || d.primaryInsurance){
+      notes.push({text:'Member: ' + (d.patientName || '[PATIENT NAME]') + (d.patientDOB ? ', DOB ' + d.patientDOB : '') + (d.primaryInsurance ? ' — ' + d.primaryInsurance : '') + (d.memberID ? ', member ID ' + d.memberID : '') + (d.groupID ? ', group ' + d.groupID : '') + '.'});
+    }
+    if(d.dateOfService) notes.push({text:'Date of service: ' + d.dateOfService + '.'});
+
+    if(d.inNetwork === 'Y'){
+      notes.push({text:'Patient is in-network' + (d.activeStatus ? ' — status: ' + d.activeStatus : ' — confirm Active/Inactive status') + '.'});
+    } else if(d.inNetwork === 'N'){
+      notes.push({text:'Patient is out-of-network — treat this service as an Out-of-Pocket Expense.', danger:true});
+      if(d.oonBenefits === 'Y') notes.push({text:'Out-of-network benefits apply' + (d.oonBenefitsList ? ': ' + d.oonBenefitsList : ' — document the specific benefits') + '.'});
+      else if(d.oonBenefits === 'N') notes.push({text:'No out-of-network benefits on file — full cost is out-of-pocket.'});
+    }
+
+    const planBits = [
+      d.insuranceType ? 'Type: ' + d.insuranceType : null,
+      d.planType ? 'Plan: ' + d.planType : null,
+      d.selfPayDependent ? (d.selfPayDependent === 'SP' ? 'Self-pay' : 'Dependent coverage') : null
+    ].filter(Boolean);
+    if(planBits.length) notes.push({text: planBits.join(' · ') + '.'});
+
+    if(d.ivOtherInsuranceEarly === 'Y' || d.ivOtherInsuranceLater === 'Y'){
+      notes.push({text:'Caller confirmed additional insurance coverage beyond the primary plan — verify coordination of benefits (which plan is primary).'});
+    }
+
+    const moneyBits = [];
+    if(d.individualDeductible) moneyBits.push('Deductible $' + d.individualDeductible + (d.deductibleMetAmount ? ' (met $' + d.deductibleMetAmount + ')' : ''));
+    if(d.coInsurancePlanPct || d.coInsurancePatientPct) moneyBits.push('Co-insurance ' + (d.coInsurancePlanPct || '—') + '/' + (d.coInsurancePatientPct || '—') + '%');
+    if(d.oopMax) moneyBits.push('OOP max $' + d.oopMax + (d.oopMetAmount ? ' (met $' + d.oopMetAmount + ')' : ''));
+    if(d.copayPCP) moneyBits.push('PCP copay $' + d.copayPCP);
+    if(d.copaySpecialist) moneyBits.push('Specialist copay $' + d.copaySpecialist);
+    if(moneyBits.length) notes.push({text: moneyBits.join(' · ') + '.'});
+
+    const coverageBits = [];
+    if(d.covDentalVisual) coverageBits.push('Dental/Visual: ' + d.covDentalVisual);
+    if(d.covPreventative) coverageBits.push('Preventive: ' + d.covPreventative);
+    if(d.covDME) coverageBits.push('DME/Mobile: ' + d.covDME);
+    if(d.covPT) coverageBits.push('Physical Therapy: ' + d.covPT);
+    if(coverageBits.length) notes.push({text:'Additional coverage — ' + coverageBits.join(', ') + '.'});
+
+    if(d.outboundCallerName || d.insuranceReceiverName || d.callIdRef){
+      notes.push({text:'Documented by: ' + (d.outboundCallerName || '[AGENT]') + (d.outboundCallerInitial ? ' ' + d.outboundCallerInitial + '.' : '') + '; insurance rep: ' + (d.insuranceReceiverName || '[REP]') + (d.insuranceReceiverInitial ? ' ' + d.insuranceReceiverInitial + '.' : '') + (d.callIdRef ? '; reference #' + d.callIdRef : '') + '.'});
+    }
+
+    const meta = PROTOCOLS["Insurance Verification"];
+    const keySignals = [d.patientName, d.primaryInsurance, d.memberID, d.inNetwork, d.providerName].filter(Boolean).length;
+    const confidence = keySignals >= 4 ? 'High' : keySignals >= 2 ? 'Medium' : 'Low';
+
+    return {
+      protocol: "Insurance Verification", cluster: meta.cluster, recap: meta.recap, multi: meta.multi,
+      when: meta.when, resolution: meta.resolution, rationale, notes, confidence
+    };
+  }
+
   function decide(d){
     const rationale = [];
     const notes = [];
@@ -1650,14 +2016,20 @@
   }
 
   document.getElementById('determineBtn').addEventListener('click', function(){
-    const data = readForm();
-    const result = decide(data);
-    render(result);
+    if(state.purpose === 'insurance_verif'){
+      const data = readInsuranceVerificationForm();
+      const result = decideInsuranceVerification(data);
+      render(result);
+    } else {
+      const data = readForm();
+      const result = decide(data);
+      render(result);
+    }
   });
 
   document.getElementById('resetBtn').addEventListener('click', function(){
     if(!confirm('Clear the entire checklist for a new call?')) return;
-    document.querySelectorAll('input[type=text], input[type=date], textarea').forEach(function(el){ el.value=''; });
+    document.querySelectorAll('input[type=text], input[type=date], input[type=number], textarea').forEach(function(el){ el.value=''; });
     document.querySelectorAll('.insChk').forEach(function(c){ c.checked=false; });
     document.querySelectorAll('.segmented button').forEach(function(b){ b.classList.remove('active','no'); });
     Object.keys(state).forEach(function(k){ state[k] = (k==='status') ? 'NA' : (k==='painScale' ? 1 : null); state.cc=''; state.companyName=''; state.companyAddress=''; state.companyManager=''; state.medsName=''; state.purpose=''; });
@@ -1670,8 +2042,12 @@
     medsFollowup.classList.remove('show');
     preopFollowup.classList.remove('show');
     formTypeFollowup.classList.remove('show');
+    inNetworkYFollowup.classList.remove('show');
+    inNetworkNFollowup.classList.remove('show');
+    oonBenefitsListFollowup.classList.remove('show');
     urgentFlag.classList.remove('show');
     resultsEl.classList.remove('show');
+    refreshModeVisibility();
     window.scrollTo({top:0, behavior:'smooth'});
   });
 
