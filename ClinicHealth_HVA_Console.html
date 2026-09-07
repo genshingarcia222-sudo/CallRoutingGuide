@@ -783,6 +783,14 @@
           </div>
         </div>
       </div>
+      <div class="field">
+        <label>Was the patient driving?</label>
+        <div class="segmented small" data-group="wasDriving">
+          <button type="button" data-val="Y">Y</button>
+          <button type="button" data-val="N">N</button>
+        </div>
+        <div class="callout">General driving question for MVA documentation — separate from the job-duties question above. Answering either way still keeps this an MVA case.</div>
+      </div>
     </section>
 
     <section class="card" id="sec-symptom">
@@ -1042,7 +1050,7 @@
   /* ---------- small state store ---------- */
   const state = {
     established:null, newPatient:null, status:'NA', purpose:'', cc:'',
-    workingAtTime:null, drivingForWork:null,
+    workingAtTime:null, drivingForWork:null, wasDriving:null,
     tolerability:null, painScale:1,
     recentlyAdmitted:null, atER:null, preopClinicals:null,
     companyName:'', companyAddress:'', companyManager:'',
@@ -1566,6 +1574,7 @@
       when: document.getElementById('when').value,
       workingAtTime: state.workingAtTime,
       drivingForWork: state.drivingForWork,
+      wasDriving: state.wasDriving,
       painScale: state.painScale,
       tolerability: state.tolerability,
       recentlyAdmitted: state.recentlyAdmitted,
@@ -1837,14 +1846,21 @@
           case 'mva': {
             protocol = "MVA Appointment";
             rationale.push('Purpose of call = Motor Vehicle Accident.');
+            if(d.wasDriving === 'Y') notes.push({text:'Confirmed the patient was driving at the time — consistent with MVA eligibility.'});
+            else if(d.wasDriving === 'N') notes.push({text:'Patient was a passenger, not the driver — still eligible under MVA as long as they were inside a licensed vehicle.'});
             if(hasCommercial && !hasMedicare && !hasAHCCCS) notes.push({text:'Only commercial insurance on file (' + insuranceLabel + ') — MVA visits are not covered by commercial plans; this will be an out-of-pocket expense unless Medicare/AHCCCS applies.'});
             break;
           }
           case 'workcomp': {
-            protocol = "Workmen's Compensation";
-            rationale.push("Purpose of call = Workers' Compensation.");
-            if(!d.companyName) notes.push({text:"Employer name, address, and manager not yet captured — required before the visit can be billed to the employer."});
-            if(d.workingAtTime === 'N') notes.push({text:'Caller indicated they were not working at the time of the incident on a weekday — verify this still qualifies as a workplace injury before proceeding.'});
+            if(d.workingAtTime === 'N'){
+              protocol = "Regular Appointment";
+              rationale.push("Purpose of call was logged as Workers' Compensation, but the patient confirmed they were NOT working at the time of the incident — this doesn't qualify as a workplace injury, so it defaults to a standard Regular Appointment instead.");
+              notes.push({text:"If further details later confirm this was work-related after all, revert to the Workmen's Compensation protocol and collect the employer's name, address, and manager for billing."});
+            } else {
+              protocol = "Workmen's Compensation";
+              rationale.push("Purpose of call = Workers' Compensation.");
+              if(!d.companyName) notes.push({text:"Employer name, address, and manager not yet captured — required before the visit can be billed to the employer."});
+            }
             break;
           }
           case 'preop': {
